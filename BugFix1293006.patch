@@ -1,0 +1,494 @@
+# HG changeset patch
+# User Aman Dwivedi <dwivedi.aman96@gmail.com>
+# Date 1483557231 -19800
+#      Thu Jan 05 00:43:51 2017 +0530
+# Node ID 73bfd591da87f8da4bf556cb0714189b7e5b3ab5
+# Parent  bbb39b5643e82496474bcf9c7dbfaaf34bf0e89f
+Bug 1293006 - Replace in-tree consumer of non-standard Iterator() with Object.{values,entries} in mail/ in comm-central, r=arai.
+
+diff --git a/mail/base/content/folderPane.js b/mail/base/content/folderPane.js
+--- a/mail/base/content/folderPane.js
++++ b/mail/base/content/folderPane.js
+@@ -1035,7 +1035,7 @@ var gFolderTreeView = {
+     // for the next add item at our own level.
+     let count = 0;
+     if (aChild.children.length && aChild.open) {
+-      for (let [i, child] in Iterator(this._rowMap[aNewIndex].children)) {
++      for (let [i, child] of Array.from(this._rowMap[aNewIndex].children).entries()) {
+         count++;
+         let index = Number(aNewIndex) + Number(i) + 1;
+         this._rowMap.splice(index, 0, child);
+diff --git a/mail/base/content/multimessageview.js b/mail/base/content/multimessageview.js
+--- a/mail/base/content/multimessageview.js
++++ b/mail/base/content/multimessageview.js
+@@ -416,7 +416,7 @@ MultiMessageSummary.prototype = {
+   _processItems: function(aItems) {
+     let knownMessageNodes = new Map();
+ 
+-    for (let [,glodaMsg] in Iterator(aItems)) {
++    for (let glodaMsg of aItems) {
+       // Unread and starred will get set if any of the messages in a collapsed
+       // thread qualify.  The trick here is that we may get multiple items
+       // corresponding to the same thread (and hence DOM node), so we need to
+@@ -520,7 +520,7 @@ ThreadSummarizer.prototype = {
+     // Summarize the selected messages.
+     let subject = null;
+     let maxCountExceeded = false;
+-    for (let [i, msgHdr] in Iterator(summarizedMessages)) {
++    for (let [i, msgHdr] of Object.entries(summarizedMessages)) {
+       if (i > this.kMaxSummarizedMessages) {
+         summarizedMessages.length = i;
+         maxCountExceeded = true;
+@@ -620,7 +620,7 @@ MultipleSelectionSummarizer.prototype = 
+     // Summarize the selected messages by thread.
+     let maxCountExceeded = false;
+     let messageCount = 0;
+-    for (let [i, msgs] in Iterator(threads)) {
++    for (let [i, msgs] of Object.entries(threads)) {
+       messageCount += msgs.length;
+       if (messageCount > this.kMaxSummarizedMessages ||
+           i > this.kMaxSummarizedThreads) {
+diff --git a/mail/base/content/specialTabs.js b/mail/base/content/specialTabs.js
+--- a/mail/base/content/specialTabs.js
++++ b/mail/base/content/specialTabs.js
+@@ -1396,7 +1396,7 @@ var specialTabs = {
+         break;
+       case "addon-install-failed":
+         // XXX TODO This isn't terribly ideal for the multiple failure case
+-        for (let [, install] in Iterator(installInfo.installs)) {
++        for (let install of installInfo.installs) {
+           let host = (installInfo.originatingURI instanceof Ci.nsIStandardURL) &&
+                       installInfo.originatingURI.host;
+           if (!host)
+@@ -1455,7 +1455,7 @@ var specialTabs = {
+               // installs.
+               let types = {};
+               let bestType = null;
+-              for (let [, install] in Iterator(installInfo.installs)) {
++              for (let install of installInfo.installs) {
+                 if (install.type in types)
+                   types[install.type]++;
+                 else
+diff --git a/mail/base/modules/dbViewWrapper.js b/mail/base/modules/dbViewWrapper.js
+--- a/mail/base/modules/dbViewWrapper.js
++++ b/mail/base/modules/dbViewWrapper.js
+@@ -1387,7 +1387,7 @@ DBViewWrapper.prototype = {
+     this.dbView = this._createView();
+     // if the synthetic view defines columns, add those for it
+     if (this.isSynthetic) {
+-      for (let [, customCol] in Iterator(this._syntheticView.customColumns)) {
++      for (let customCol of this._syntheticView.customColumns) {
+         customCol.bindToView(this.dbView);
+         this.dbView.addColumnHandler(customCol.id, customCol);
+       }
+diff --git a/mail/base/modules/quickFilterManager.js b/mail/base/modules/quickFilterManager.js
+--- a/mail/base/modules/quickFilterManager.js
++++ b/mail/base/modules/quickFilterManager.js
+@@ -1011,7 +1011,7 @@ var MessageTextFilter = {
+         term = null;
+         let splitPhrases = groupedPhrases.split("|");
+         for (let phrase of splitPhrases) {
+-          for (let [tfName, tfValue] in Iterator(aFilterValue.states)) {
++          for (let [tfName, tfValue] of Object.entries(aFilterValue.states)) {
+             if (!tfValue)
+               continue;
+             let tfDef = this.textFilterDefs[tfName];
+diff --git a/mail/base/test/unit/resources/viewWrapperTestUtils.js b/mail/base/test/unit/resources/viewWrapperTestUtils.js
+--- a/mail/base/test/unit/resources/viewWrapperTestUtils.js
++++ b/mail/base/test/unit/resources/viewWrapperTestUtils.js
+@@ -458,7 +458,7 @@ function verify_view_level_histogram(aEx
+     actualHisto[level] = (actualHisto[level] || 0) + 1;
+   }
+ 
+-  for (let [level, count] in Iterator(aExpectedHisto)) {
++  for (let [level, count] of Object.entries(aExpectedHisto)) {
+     if (actualHisto[level] != count) {
+       dump_view_state(aViewWrapper);
+       dump("*******************\n");
+diff --git a/mail/base/test/unit/test_windows_font_migration.js b/mail/base/test/unit/test_windows_font_migration.js
+--- a/mail/base/test/unit/test_windows_font_migration.js
++++ b/mail/base/test/unit/test_windows_font_migration.js
+@@ -39,10 +39,10 @@ function makeVerifier(aFonts) {
+       aNonDefaultFonts = {};
+ 
+     let expectedFonts = {};
+-    for (let [, key] in Iterator(kNamesToVerify))
++    for (let key of kNamesToVerify)
+       expectedFonts[key] = (key in aNonDefaultFonts ? aNonDefaultFonts[key] :
+                             aFonts[key]);
+-    for (let [, key] in Iterator(kSizesToVerify)) {
++    for (let key of kSizesToVerify) {
+       let nonDefaultKey = key + (aFonts.migrated ? "" : "Non") + "Migrated";
+       expectedFonts[key] = (nonDefaultKey in aNonDefaultFonts ?
+                             aNonDefaultFonts[nonDefaultKey] :
+@@ -131,8 +131,8 @@ var kPrefBranchesToClear = [
+  */
+ function reset_font_prefs(aDontResetVersion) {
+   // kPrefBranchesToClear x kEncodingsToClear
+-  for (let [, prefBranch] in Iterator(kPrefBranchesToClear)) {
+-    for (let [, encoding] in Iterator(kEncodingsToClear)) {
++  for (let prefBranch of kPrefBranchesToClear) {
++    for (let encoding of kEncodingsToClear) {
+       let pref = prefBranch + encoding;
+       if (Services.prefs.prefHasUserValue(pref))
+         Services.prefs.clearUserPref(pref);
+@@ -344,16 +344,16 @@ var otherTests = [
+ function run_test() {
+   reset_font_prefs();
+ 
+-  for (let [, [version, verifier]] in Iterator(kWindowsVersions)) {
++  for (let [version, verifier] of kWindowsVersions) {
+     set_windows_version(version);
+ 
+-    for (let [, test] in Iterator(testsForEveryVersion)) {
++    for (let test of testsForEveryVersion) {
+       test(verifier);
+       reset_font_prefs();
+     }
+   }
+ 
+-  for (let [, test] in Iterator(otherTests)) {
++  for (let test of otherTests) {
+     test();
+     reset_font_prefs();
+   }
+diff --git a/mail/components/about-support/aboutSupport.js b/mail/components/about-support/aboutSupport.js
+--- a/mail/components/about-support/aboutSupport.js
++++ b/mail/components/about-support/aboutSupport.js
+@@ -23,11 +23,11 @@ var gMessengerBundle = Services.strings.
+   "chrome://messenger/locale/messenger.properties");
+ 
+ var gSocketTypes = {};
+-for (let [str, index] in Iterator(Ci.nsMsgSocketType))
++for (let [str, index] of Object.entries(Ci.nsMsgSocketType))
+   gSocketTypes[index] = str;
+ 
+ var gAuthMethods = {};
+-for (let [str, index] in Iterator(Ci.nsMsgAuthMethod))
++for (let [str, index] of Object.entries(Ci.nsMsgAuthMethod))
+   gAuthMethods[index] = str;
+ 
+ // l10n properties in messenger.properties corresponding to each auth method
+diff --git a/mail/components/activity/content/activity.xml b/mail/components/activity/content/activity.xml
+--- a/mail/components/activity/content/activity.xml
++++ b/mail/components/activity/content/activity.xml
+@@ -137,7 +137,7 @@
+           // convert strings to those in the string bundle
+           let sb = document.getElementById("activityStrings");
+           let getStr = string => sb.getString(string);
+-          for (let [name, value] in Iterator(this.text)) {
++          for (let [name, value] of Object.entries(this.text)) {
+             this.text[name] = typeof value == "string" ? getStr(value)
+                                                        : value.map(getStr);
+           }
+diff --git a/mail/components/addrbook/content/abTrees.js b/mail/components/addrbook/content/abTrees.js
+--- a/mail/components/addrbook/content/abTrees.js
++++ b/mail/components/addrbook/content/abTrees.js
+@@ -234,7 +234,7 @@ directoryTreeView.prototype = {
+       return;
+ 
+     // Now select this new item
+-    for (var [i, row] in Iterator(this._rowMap)) {
++    for (var [i, row] of Object.entries(this._rowMap)) {
+       if (row.id == aItem.URI) {
+         this.selection.select(i);
+         break;
+@@ -259,7 +259,7 @@ directoryTreeView.prototype = {
+     }
+ 
+     // Now select this parent item
+-    for (var [i, row] in Iterator(this._rowMap)) {
++    for (var [i, row] of Object.entries(this._rowMap)) {
+       if (row.id == aParent.URI) {
+         this.selection.select(i);
+         break;
+diff --git a/mail/test/mozmill/cloudfile/test-cloudfile-add-account-dialog.js b/mail/test/mozmill/cloudfile/test-cloudfile-add-account-dialog.js
+--- a/mail/test/mozmill/cloudfile/test-cloudfile-add-account-dialog.js
++++ b/mail/test/mozmill/cloudfile/test-cloudfile-add-account-dialog.js
+@@ -54,7 +54,7 @@ function teardownModule(module) {
+   gCategoryMan.deleteCategory(kCategory);
+ 
+   // Put the old entries back
+-  for (let [key, value] in Iterator(gOldProviders))
++  for (let [key, value] of Object.entries(gOldProviders))
+     gCategoryMan.addCategoryEntry(kCategory, key, value, false, true);
+ }
+ 
+diff --git a/mail/test/mozmill/cloudfile/test-cloudfile-backend-hightail.js b/mail/test/mozmill/cloudfile/test-cloudfile-backend-hightail.js
+--- a/mail/test/mozmill/cloudfile/test-cloudfile-backend-hightail.js
++++ b/mail/test/mozmill/cloudfile/test-cloudfile-backend-hightail.js
+@@ -145,7 +145,7 @@ function test_chained_uploads() {
+ 
+   assert_equals(kFilenames.length, obs.numSightings(kUploadFile));
+ 
+-  for (let [index, filename] in Iterator(kFilenames)) {
++  for (let [index, filename] of Object.entries(kFilenames)) {
+     assert_equals(obs.data[kUploadFile][index], filename);
+     let file = getFile("./data/" + filename, __file__);
+     let expectedUriForFile = kExpectedUrlRoot + filename;
+diff --git a/mail/test/mozmill/cloudfile/test-cloudfile-manager.js b/mail/test/mozmill/cloudfile/test-cloudfile-manager.js
+--- a/mail/test/mozmill/cloudfile/test-cloudfile-manager.js
++++ b/mail/test/mozmill/cloudfile/test-cloudfile-manager.js
+@@ -105,7 +105,7 @@ function test_load_accounts_and_properly
+     const kExpected = ["someKey3", "someKey2", "someKey4",
+                        "someKey1"];
+ 
+-    for (let [index, expectedKey] in Iterator(kExpected)) {
++    for (let [index, expectedKey] of Object.entries(kExpected)) {
+       let item = richList.getItemAtIndex(index);
+       assert_equals(expectedKey, item.value,
+                     "The account list is out of order");
+diff --git a/mail/test/mozmill/content-tabs/test-about-support.js b/mail/test/mozmill/content-tabs/test-about-support.js
+--- a/mail/test/mozmill/content-tabs/test-about-support.js
++++ b/mail/test/mozmill/content-tabs/test-about-support.js
+@@ -88,12 +88,12 @@ function test_display_about_support() {
+   let tab = open_about_support();
+   // Check that the document has a few strings that indicate that we've loaded
+   // the right page.
+-  for (let [, str] in Iterator(ABOUT_SUPPORT_STRINGS)) {
++  for (let str of ABOUT_SUPPORT_STRINGS) {
+     assert_content_tab_text_present(tab, str);
+   }
+ 
+   // Check that error strings aren't present anywhere
+-  for (let [, str] in Iterator(ABOUT_SUPPORT_ERROR_STRINGS)) {
++  for (let str of ABOUT_SUPPORT_ERROR_STRINGS) {
+     assert_content_tab_text_absent(tab, str);
+   }
+   close_tab(tab);
+@@ -195,17 +195,17 @@ function test_copy_to_clipboard_public()
+   // To avoid destroying the current contents of the clipboard, instead of
+   // actually copying to it, we just retrieve what would have been copied to it
+   let transferable = tab.browser.contentWindow.getClipboardTransferable();
+-  for (let [, flavor] in Iterator(["text/html", "text/unicode"])) {
++  for (let flavor of ["text/html", "text/unicode"]) {
+     let data = {};
+     transferable.getTransferData(flavor, data, {});
+     let text = data.value.QueryInterface(Ci.nsISupportsString).data;
+ 
+-    for (let [, str] in Iterator(ABOUT_SUPPORT_STRINGS)) {
++    for (let str of ABOUT_SUPPORT_STRINGS) {
+       if (!text.includes(str))
+         mark_failure(["Unable to find \"" + str + "\" in flavor \"" + flavor + "\""]);
+     }
+ 
+-    for (let [, str] in Iterator(ABOUT_SUPPORT_ERROR_STRINGS)) {
++    for (let str of ABOUT_SUPPORT_ERROR_STRINGS) {
+       if (text.includes(str))
+         mark_failure(["Found \"" + str + "\" in flavor \"" + flavor + "\""]);
+     }
+@@ -236,17 +236,17 @@ function test_copy_to_clipboard_private(
+   // To avoid destroying the current contents of the clipboard, instead of
+   // actually copying to it, we just retrieve what would have been copied to it
+   let transferable = tab.browser.contentWindow.getClipboardTransferable();
+-  for (let [, flavor] in Iterator(["text/html", "text/unicode"])) {
++  for (let flavor of ["text/html", "text/unicode"]) {
+     let data = {};
+     transferable.getTransferData(flavor, data, {});
+     let text = data.value.QueryInterface(Ci.nsISupportsString).data;
+ 
+-    for (let [, str] in Iterator(ABOUT_SUPPORT_STRINGS)) {
++    for (let str of ABOUT_SUPPORT_STRINGS) {
+       if (!text.includes(str))
+         mark_failure(["Unable to find \"" + str + "\" in flavor \"" + flavor + "\""]);
+     }
+ 
+-    for (let [, str] in Iterator(ABOUT_SUPPORT_ERROR_STRINGS)) {
++    for (let str of ABOUT_SUPPORT_ERROR_STRINGS) {
+       if (text.includes(str))
+         mark_failure(["Found \"" + str + "\" in flavor \"" + flavor + "\""]);
+     }
+@@ -273,12 +273,12 @@ function test_send_via_email_public() {
+   let contentFrame = cwc.e("content-frame");
+   let text = contentFrame.contentDocument.body.innerHTML;
+ 
+-  for (let [, str] in Iterator(ABOUT_SUPPORT_STRINGS)) {
++  for (let str of ABOUT_SUPPORT_STRINGS) {
+     if (!text.includes(str))
+       mark_failure(["Unable to find \"" + str + "\" in compose window"]);
+   }
+ 
+-  for (let [, str] in Iterator(ABOUT_SUPPORT_ERROR_STRINGS)) {
++  for (let str of ABOUT_SUPPORT_ERROR_STRINGS) {
+     if (text.includes(str))
+       mark_failure(["Found \"" + str + "\" in compose window"]);
+   }
+@@ -312,12 +312,12 @@ function test_send_via_email_private() {
+   let contentFrame = cwc.e("content-frame");
+   let text = contentFrame.contentDocument.body.innerHTML;
+ 
+-  for (let [, str] in Iterator(ABOUT_SUPPORT_STRINGS)) {
++  for (let str of ABOUT_SUPPORT_STRINGS) {
+     if (!text.includes(str))
+       mark_failure(["Unable to find \"" + str + "\" in compose window"]);
+   }
+ 
+-  for (let [, str] in Iterator(ABOUT_SUPPORT_ERROR_STRINGS)) {
++  for (let str of ABOUT_SUPPORT_ERROR_STRINGS) {
+     if (text.includes(str))
+       mark_failure(["Found \"" + str + "\" in compose window"]);
+   }
+diff --git a/mail/test/mozmill/folder-display/test-display-name.js b/mail/test/mozmill/folder-display/test-display-name.js
+--- a/mail/test/mozmill/folder-display/test-display-name.js
++++ b/mail/test/mozmill/folder-display/test-display-name.js
+@@ -186,7 +186,7 @@ function check_display_name(index, colum
+ }
+ 
+ // Generate a test for each message in |messages|.
+-for (let [i, message] in Iterator(messages)) {
++for (let [i, message] of Object.entries(messages)) {
+   this["test_" + message.name] = function(i, message) {
+     check_display_name(i, message.expected.column, message.expected.value);
+   }.bind(this, i, message);
+diff --git a/mail/test/mozmill/folder-display/test-folder-pane-visibility.js b/mail/test/mozmill/folder-display/test-folder-pane-visibility.js
+--- a/mail/test/mozmill/folder-display/test-folder-pane-visibility.js
++++ b/mail/test/mozmill/folder-display/test-folder-pane-visibility.js
+@@ -193,7 +193,7 @@ function test_folder_pane_persistence_ge
+   //  visible, 0 for hidden)
+   function openTabs(aConfig) {
+     let curState;
+-    for (let [iTab, folderPaneVisible] in Iterator(aConfig)) {
++    for (let [iTab, folderPaneVisible] of Object.entries(aConfig)) {
+       if (iTab == 0) {
+         curState = folderPaneVisible;
+       }
+@@ -214,7 +214,7 @@ function test_folder_pane_persistence_ge
+   }
+ 
+   function verifyTabs(aConfig) {
+-    for (let [iTab, folderPaneVisible] in Iterator(aConfig)) {
++    for (let [iTab, folderPaneVisible] of Object.entries(aConfig)) {
+       switch_tab(iTab);
+       dump(" checking tab: " + iTab + "\n");
+       if (folderPaneVisible)
+diff --git a/mail/test/mozmill/folder-display/test-message-pane-visibility.js b/mail/test/mozmill/folder-display/test-message-pane-visibility.js
+--- a/mail/test/mozmill/folder-display/test-message-pane-visibility.js
++++ b/mail/test/mozmill/folder-display/test-message-pane-visibility.js
+@@ -165,7 +165,7 @@ function test_message_pane_persistence_g
+   //  visible, 0 for hidden)
+   function openTabs(aConfig) {
+     let curState;
+-    for (let [iTab, messagePaneVisible] in Iterator(aConfig)) {
++    for (let [iTab, messagePaneVisible] of Object.entries(aConfig)) {
+       if (iTab == 0) {
+         curState = messagePaneVisible;
+       }
+@@ -186,7 +186,7 @@ function test_message_pane_persistence_g
+   }
+ 
+   function verifyTabs(aConfig) {
+-    for (let [iTab, messagePaneVisible] in Iterator(aConfig)) {
++    for (let [iTab, messagePaneVisible] of Object.entries(aConfig)) {
+       switch_tab(iTab);
+       dump(" checking tab: " + iTab + "\n");
+       if (messagePaneVisible)
+diff --git a/mail/test/mozmill/newmailaccount/test-newmailaccount.js b/mail/test/mozmill/newmailaccount/test-newmailaccount.js
+--- a/mail/test/mozmill/newmailaccount/test-newmailaccount.js
++++ b/mail/test/mozmill/newmailaccount/test-newmailaccount.js
+@@ -1095,7 +1095,7 @@ function subtest_disabled_fields_when_se
+   wait_for_element_enabled(aController, aController.e("name"), false);
+   let providerCheckboxes = doc.querySelectorAll(".providerCheckbox");
+ 
+-  for (let [, checkbox] in Iterator(providerCheckboxes))
++  for (let checkbox of providerCheckboxes)
+     wait_for_element_enabled(aController, checkbox, false);
+ 
+   // Check to ensure that the buttons for switching to the wizard and closing
+@@ -1109,7 +1109,7 @@ function subtest_disabled_fields_when_se
+   wait_for_element_enabled(aController, aController.e("searchSubmit"), true);
+   wait_for_element_enabled(aController, aController.e("name"), true);
+ 
+-  for (let [, checkbox] in Iterator(providerCheckboxes))
++  for (let checkbox of providerCheckboxes)
+     wait_for_element_enabled(aController, checkbox, true);
+ 
+   // Ok, cleanup time. Put the old suggest URL back.
+diff --git a/mail/test/mozmill/pref-window/test-font-chooser.js b/mail/test/mozmill/pref-window/test-font-chooser.js
+--- a/mail/test/mozmill/pref-window/test-font-chooser.js
++++ b/mail/test/mozmill/pref-window/test-font-chooser.js
+@@ -46,7 +46,7 @@ function setupModule(module) {
+ 
+   gFontEnumerator = Cc["@mozilla.org/gfx/fontenumerator;1"]
+                       .createInstance(Ci.nsIFontEnumerator);
+-  for (let [, fontType] in Iterator(kFontTypes)) {
++  for (let fontType of kFontTypes) {
+     gRealFontLists[fontType] =
+       gFontEnumerator.EnumerateFonts(kLanguage, fontType, {});
+     if (gRealFontLists[fontType].length == 0)
+@@ -107,7 +107,7 @@ function test_font_name_displayed() {
+ 
+   // Pick the first font for each font type and set it.
+   let expected = {};
+-  for (let [fontType, fontList] in Iterator(gRealFontLists)) {
++  for (let [fontType, fontList] of Object.entries(gRealFontLists)) {
+     // Work around bug 698238 (on Windows, Courier is returned by the enumerator but
+     // substituted with Courier New) by getting the standard (substituted) family
+     // name for each font.
+@@ -140,7 +140,7 @@ function test_font_name_not_present() {
+   // The fonts we're expecting to see selected in the font chooser for
+   // test_font_name_not_present.
+   let expected = {};
+-  for (let [fontType, fakeFont] in Iterator(kFakeFonts)) {
++  for (let [fontType, fakeFont] of Object.entries(kFakeFonts)) {
+     // Look at the font.name-list. We need to verify that the first font is the
+     // fake one, and that the second one is present on the user's computer.
+     let listPref = "font.name-list." + fontType + "." + kLanguage;
+diff --git a/mail/test/mozmill/shared-modules/test-compose-helpers.js b/mail/test/mozmill/shared-modules/test-compose-helpers.js
+--- a/mail/test/mozmill/shared-modules/test-compose-helpers.js
++++ b/mail/test/mozmill/shared-modules/test-compose-helpers.js
+@@ -347,7 +347,7 @@ function add_attachments(aComposeWindow,
+ 
+   let attachments = [];
+ 
+-  for (let [i, url] in Iterator(aUrls)) {
++  for (let [i, url] of Object.entries(aUrls)) {
+     attachments.push(create_msg_attachment(url, aSizes[i]));
+   }
+ 
+diff --git a/mail/test/mozmill/shared-modules/test-folder-display-helpers.js b/mail/test/mozmill/shared-modules/test-folder-display-helpers.js
+--- a/mail/test/mozmill/shared-modules/test-folder-display-helpers.js
++++ b/mail/test/mozmill/shared-modules/test-folder-display-helpers.js
+@@ -2581,7 +2581,7 @@ function assert_folder_at_index_as(n, st
+  * Since indexOf does strict equality checking, we need this.
+  */
+ function _non_strict_index_of(aArray, aSearchElement) {
+-  for ([i, item] in Iterator(aArray)) {
++  for ([i, item] of Object.entries(aArray)) {
+     if (item == aSearchElement)
+       return i;
+   }
+diff --git a/mail/test/mozmill/shared-modules/test-observer-helpers.js b/mail/test/mozmill/shared-modules/test-observer-helpers.js
+--- a/mail/test/mozmill/shared-modules/test-observer-helpers.js
++++ b/mail/test/mozmill/shared-modules/test-observer-helpers.js
+@@ -63,7 +63,7 @@ ObservationRecorder.prototype = {
+     if (!Array.isArray(aTopics))
+       aTopics = [aTopics];
+ 
+-    for (let [, topic] in Iterator(aTopics)) {
++    for (let topic of aTopics) {
+       if (topic in this.saw)
+         delete this.saw[topic];
+       if (topic in this.subject)
+diff --git a/mail/test/mozmill/shared-modules/test-window-helpers.js b/mail/test/mozmill/shared-modules/test-window-helpers.js
+--- a/mail/test/mozmill/shared-modules/test-window-helpers.js
++++ b/mail/test/mozmill/shared-modules/test-window-helpers.js
+@@ -905,7 +905,7 @@ var AugmentEverybodyWith = {
+       }
+       else {
+         let msg = "Query constraint not implemented, query contained:";
+-        for (let [key, val] in Iterator(aQuery)) {
++        for (let [key, val] of Object.entries(aQuery)) {
+           msg += " '" + key + "': " + val;
+         }
+         throw new Error(msg);
+diff --git a/mail/test/mozmill/utils/test-iteratorUtils.js b/mail/test/mozmill/utils/test-iteratorUtils.js
+--- a/mail/test/mozmill/utils/test-iteratorUtils.js
++++ b/mail/test/mozmill/utils/test-iteratorUtils.js
+@@ -78,6 +78,6 @@ function test_toArray_custom_content_ite
+ 
+   assert_equals(kExpected.length, iterArray.length);
+ 
+-  for (let [i, val] in Iterator(kExpected))
++  for (let [i, val] of Object.entries(kExpected))
+     assert_equals(val, iterArray[i]);
+ }

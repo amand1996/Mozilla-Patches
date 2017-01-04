@@ -1,0 +1,345 @@
+# HG changeset patch
+# User Aman Dwivedi <dwivedi.aman96@gmail.com>
+# Date 1483554454 -19800
+#      Wed Jan 04 23:57:34 2017 +0530
+# Node ID 6898961f9468ab7682c9306b486012ec6329af00
+# Parent  bbb39b5643e82496474bcf9c7dbfaaf34bf0e89f
+Bug 1293007 - Replace in-tree consumer of non-standard Iterator() with Object.{values,entries} in mailnews/ in comm-central, r=arai.
+
+diff --git a/mailnews/base/content/jsTreeView.js b/mailnews/base/content/jsTreeView.js
+--- a/mailnews/base/content/jsTreeView.js
++++ b/mailnews/base/content/jsTreeView.js
+@@ -124,7 +124,7 @@ PROTO_TREE_VIEW.prototype = {
+     // for the next add item at our own level.
+     let currentCount = this._rowMap.length;
+     if (aChild.children.length && aChild.open) {
+-      for (let [i, child] in Iterator(this._rowMap[aNewIndex].children)) {
++      for (let [i, child] of Array.from(this._rowMap[aNewIndex].children).entries()) {
+         let index = aNewIndex + i + 1;
+         this._rowMap.splice(index, 0, child);
+         aNewIndex += this.recursivelyAddToMap(child, index);
+diff --git a/mailnews/base/test/unit/test_autoconfigUtils.js b/mailnews/base/test/unit/test_autoconfigUtils.js
+--- a/mailnews/base/test/unit/test_autoconfigUtils.js
++++ b/mailnews/base/test/unit/test_autoconfigUtils.js
+@@ -66,7 +66,7 @@ function assert_equal_host_entries(hostE
+ function assert_equal_try_orders(aA, aB)
+ {
+   assert_equal(aA.length, aB.length, "tryOrders have different length");
+-  for (let [i,subA] in Iterator(aA)) {
++  for (let [i,subA] of Object.entries(aA)) {
+     let subB = aB[i];
+     assert_equal_host_entries(subA, subB);
+   }
+diff --git a/mailnews/base/test/unit/test_iteratorUtils.js b/mailnews/base/test/unit/test_iteratorUtils.js
+--- a/mailnews/base/test/unit/test_iteratorUtils.js
++++ b/mailnews/base/test/unit/test_iteratorUtils.js
+@@ -132,7 +132,7 @@ function test_toArray_NodeList() {
+   do_check_true(childNodes.length > 0);
+   let childArray = iteratorUtils.toArray(childNodes);
+   do_check_eq(childNodes.length, childArray.length);
+-  for (let [i, node] in Iterator(childArray))
++  for (let [i, node] of Object.entries(childArray))
+     do_check_eq(node, childArray[i]);
+ }
+ 
+@@ -147,7 +147,7 @@ function test_toArray_builtin_iterator()
+   // returned by Iterator for an array
+   let iteratorArray = iteratorUtils.toArray(iterator);
+   do_check_eq(arr.length, iteratorArray.length);
+-  for (let [i, val] in Iterator(arr)) {
++  for (let [i, val] of Object.entries(arr)) {
+     do_check_eq(i, iteratorArray[i][0]);
+     do_check_eq(val, iteratorArray[i][1]);
+   }
+@@ -183,7 +183,7 @@ function test_toArray_custom_iterator() 
+   };
+   let iteratorArray = iteratorUtils.toArray(iterator);
+   do_check_eq(arr.length, iteratorArray.length);
+-  for (let [i, val] in Iterator(arr))
++  for (let [i, val] of Object.entries(arr))
+     do_check_eq(val, iteratorArray[i]);
+ }
+ 
+diff --git a/mailnews/base/test/unit/test_nsMsgDBView.js b/mailnews/base/test/unit/test_nsMsgDBView.js
+--- a/mailnews/base/test/unit/test_nsMsgDBView.js
++++ b/mailnews/base/test/unit/test_nsMsgDBView.js
+@@ -973,7 +973,7 @@ function* actually_run_test() {
+   dump("Num Messages: " + gTestFolder.msgDatabase.dBFolderInfo.numMessages + "\n");
+ 
+   // for each view type...
+-  for (let [, view_type_and_flags] in Iterator(view_types)) {
++  for (let view_type_and_flags of view_types) {
+     let [view_type, view_flags] = view_type_and_flags;
+     dump("===== Testing View Type: " + view_type + " flags: " + view_flags +
+          "\n");
+@@ -982,13 +982,13 @@ function* actually_run_test() {
+     // ... run each test
+     setup_view(view_type, view_flags);
+ 
+-    for (let [, testFunc] in Iterator(tests_for_all_views)) {
++    for (let testFunc of tests_for_all_views) {
+       dump("=== Running generic test: " + testFunc.name + "\n");
+       yield async_run({func: testFunc});
+     }
+ 
+     if (tests_for_specific_views[view_type]) {
+-      for (let [, testFunc] in Iterator(tests_for_specific_views[view_type])) {
++      for (let testFunc of tests_for_specific_views[view_type]) {
+         dump("=== Running view-specific test: " + testFunc.name + "\n");
+         yield async_run({func: testFunc});
+       }
+diff --git a/mailnews/db/gloda/components/glautocomp.js b/mailnews/db/gloda/components/glautocomp.js
+--- a/mailnews/db/gloda/components/glautocomp.js
++++ b/mailnews/db/gloda/components/glautocomp.js
+@@ -346,7 +346,7 @@ function ContactTagCompleter() {
+ ContactTagCompleter.prototype = {
+   _buildSuffixTree: function() {
+     let tagNames = [], tags = [];
+-    for (let [tagName, tag] in Iterator(FreeTagNoun.knownFreeTags)) {
++    for (let [tagName, tag] of Object.entries(FreeTagNoun.knownFreeTags)) {
+       tagNames.push(tagName.toLowerCase());
+       tags.push(tag);
+     }
+diff --git a/mailnews/db/gloda/modules/collection.js b/mailnews/db/gloda/modules/collection.js
+--- a/mailnews/db/gloda/modules/collection.js
++++ b/mailnews/db/gloda/modules/collection.js
+@@ -273,7 +273,7 @@ var GlodaCollectionManager = {
+     let needToCache = [];
+     // next, let's fall back to our collections
+     for (let collection of this.getCollectionsForNounID(aNounID)) {
+-      for (let [iItem, item] in Iterator(unresolvedIndexToItem)) {
++      for (let [iItem, item] of Object.entries(unresolvedIndexToItem)) {
+         if (item.id in collection._idMap) {
+           let realItem = collection._idMap[item.id];
+           // update the caller's array to now have the 'real' object
+diff --git a/mailnews/db/gloda/modules/datamodel.js b/mailnews/db/gloda/modules/datamodel.js
+--- a/mailnews/db/gloda/modules/datamodel.js
++++ b/mailnews/db/gloda/modules/datamodel.js
+@@ -154,7 +154,7 @@ var GlodaHasAttributesMixIn = {
+ 
+ function MixIn(aConstructor, aMixIn) {
+   let proto = aConstructor.prototype;
+-  for (let [name, func] in Iterator(aMixIn)) {
++  for (let [name, func] of Object.entries(aMixIn)) {
+     if (name.startsWith("get_"))
+       proto.__defineGetter__(name.substring(4), func);
+     else
+diff --git a/mailnews/db/gloda/modules/datastore.js b/mailnews/db/gloda/modules/datastore.js
+--- a/mailnews/db/gloda/modules/datastore.js
++++ b/mailnews/db/gloda/modules/datastore.js
+@@ -112,7 +112,7 @@ var QueryFromQueryResolver = {
+       originColl.masterCollection.inverseReferencesByNounID;
+ 
+     if (originColl.pendingItems) {
+-      for (let [, item] in Iterator(originColl.pendingItems)) {
++      for (let item of originColl.pendingItems) {
+         //QFQ_LOG.debug("QFQR: loading deferred " + item.NOUN_ID + ":" + item.id);
+         GlodaDatastore.loadNounDeferredDeps(item, referencesByNounID,
+             inverseReferencesByNounID);
+@@ -214,8 +214,7 @@ QueryFromQueryCallback.prototype = {
+         let item = nounDef.objFromRow.call(nounDef.datastore, row);
+         if (this.collection.stashedColumns) {
+           let stashed = this.collection.stashedColumns[item.id] = [];
+-          for (let [,iCol] in
+-               Iterator(this.collection.query.options.stashColumns)) {
++          for (let iCol of this.collection.query.options.stashColumns) {
+             stashed.push(GlodaDatastore._getVariant(row, iCol));
+           }
+         }
+@@ -3493,7 +3492,7 @@ var GlodaDatastore = {
+ 
+     if (aQuery._order.length) {
+       let orderClauses = [];
+-      for (let [, colName] in Iterator(aQuery._order)) {
++      for (let colName of aQuery._order) {
+          if (colName.startsWith("-"))
+            orderClauses.push(colName.substring(1) + " DESC");
+          else
+@@ -3531,7 +3530,7 @@ var GlodaDatastore = {
+       aBoundArgs, aNounDef, aQuery, aListener, aListenerData,
+       aExistingCollection, aMasterCollection) {
+     let statement = this._createAsyncStatement(aSqlString, true);
+-    for (let [iBinding, bindingValue] in Iterator(aBoundArgs)) {
++    for (let [iBinding, bindingValue] of Object.entries(aBoundArgs)) {
+       this._bindVariant(statement, iBinding, bindingValue);
+     }
+ 
+@@ -3732,7 +3731,7 @@ var GlodaDatastore = {
+ 
+     let attribIDToDBDefAndParam = this._attributeIDToDBDefAndParam;
+ 
+-    for (let [attribId, jsonValue] in Iterator(aItem._deps)) {
++    for (let [attribId, jsonValue] of Object.entries(aItem._deps)) {
+       let dbAttrib = attribIDToDBDefAndParam[attribId][0];
+       let attrib = dbAttrib.attrDef;
+ 
+diff --git a/mailnews/db/gloda/modules/fundattr.js b/mailnews/db/gloda/modules/fundattr.js
+--- a/mailnews/db/gloda/modules/fundattr.js
++++ b/mailnews/db/gloda/modules/fundattr.js
+@@ -781,10 +781,10 @@ var GlodaFundAttr = {
+       score += this.NOTABILITY_INVOLVING_ME;
+ 
+     let involvedAddrBookCount = 0;
+-    for (let [, identity] in Iterator(aMessage.to))
++    for (let identity of aMessage.to)
+       if (identity.inAddressBook)
+         involvedAddrBookCount++;
+-    for (let [, identity] in Iterator(aMessage.cc))
++    for (let identity of aMessage.cc)
+       if (identity.inAddressBook)
+         involvedAddrBookCount++;
+     if (involvedAddrBookCount)
+diff --git a/mailnews/db/gloda/modules/gloda.js b/mailnews/db/gloda/modules/gloda.js
+--- a/mailnews/db/gloda/modules/gloda.js
++++ b/mailnews/db/gloda/modules/gloda.js
+@@ -2054,7 +2054,7 @@ var Gloda = {
+         if (objectNounDef.toJSON) {
+           let toJSON = objectNounDef.toJSON;
+           jsonDict[attrib.id] = [];
+-          for (let [, subValue] in Iterator(value)) {
++          for (let subValue of value) {
+             jsonDict[attrib.id].push(toJSON(subValue));
+           }
+         }
+@@ -2261,7 +2261,7 @@ var Gloda = {
+         if (provider.score)
+           score += provider.score(item);
+       }
+-      for (let [, extraScoreFunc] in Iterator(aExtraScoreFuncs))
++      for (let extraScoreFunc of aExtraScoreFuncs)
+         score += extraScoreFunc(item, aContext);
+       scores.push(score);
+     }
+diff --git a/mailnews/db/gloda/test/unit/resources/genericIndexer.js b/mailnews/db/gloda/test/unit/resources/genericIndexer.js
+--- a/mailnews/db/gloda/test/unit/resources/genericIndexer.js
++++ b/mailnews/db/gloda/test/unit/resources/genericIndexer.js
+@@ -36,7 +36,7 @@ var GenericIndexer = {
+   _worker_index_generic: function*(aJob, aCallbackHandle) {
+     this._log.debug("Beginning indexing " + aJob.items.length +
+                     " generic items");
+-    for (let [, item] in Iterator(aJob.items)) {
++    for (let item of aJob.items) {
+       this._log.debug("Indexing: " + item);
+       yield aCallbackHandle.pushAndGo(
+         Gloda.grokNounItem(item, {},
+diff --git a/mailnews/db/gloda/test/unit/test_fts3_tokenizer.js b/mailnews/db/gloda/test/unit/test_fts3_tokenizer.js
+--- a/mailnews/db/gloda/test/unit/test_fts3_tokenizer.js
++++ b/mailnews/db/gloda/test/unit/test_fts3_tokenizer.js
+@@ -173,7 +173,7 @@ function msgSearchExpectCount(aCount, aF
+ 
+   // Bind the parameters
+   let stmt = conn.createStatement(sql);
+-  for (let [iBinding, bindingValue] in Iterator(args)) {
++  for (let [iBinding, bindingValue] of Object.entries(args)) {
+     GlodaDatastore._bindVariant(stmt, iBinding, bindingValue);
+   }
+ 
+diff --git a/mailnews/mime/test/unit/test_message_attachment.js b/mailnews/mime/test/unit/test_message_attachment.js
+--- a/mailnews/mime/test/unit/test_message_attachment.js
++++ b/mailnews/mime/test/unit/test_message_attachment.js
+@@ -75,7 +75,7 @@ var gStreamListener = {
+     // here because it's simple.
+     let regex = /<legend class="mimeAttachmentHeaderName">(.*?)<\/legend>/gi;
+ 
+-    for (let [,attachment] in Iterator(messages[this.index].attachments)) {
++    for (let attachment of messages[this.index].attachments) {
+       let match = regex.exec(this.contents);
+       do_check_neq(match, null);
+       do_check_eq(match[1], attachment.expectedFilename || attachment.filename);
+diff --git a/mailnews/test/resources/mailTestUtils.js b/mailnews/test/resources/mailTestUtils.js
+--- a/mailnews/test/resources/mailTestUtils.js
++++ b/mailnews/test/resources/mailTestUtils.js
+@@ -476,7 +476,7 @@ var mailTestUtils = {
+    * For when you want to compare elements non-strictly.
+    */
+   non_strict_index_of: function(aArray, aElem) {
+-    for (let [i, elem] in Iterator(aArray)) {
++    for (let [i, elem] of Object.entries(aArray)) {
+       if (elem == aElem)
+         return i;
+     }
+diff --git a/mailnews/test/resources/messageGenerator.js b/mailnews/test/resources/messageGenerator.js
+--- a/mailnews/test/resources/messageGenerator.js
++++ b/mailnews/test/resources/messageGenerator.js
+@@ -103,7 +103,7 @@ SyntheticPart.prototype = {
+     if (this._filename)
+       s += ';\r\n name="' + this._filename +'"';
+     if (this._contentTypeExtra) {
+-      for (let [key, value] in Iterator(this._contentTypeExtra))
++      for (let [key, value] of Object.entries(this._contentTypeExtra))
+         s += ';\r\n ' + key + '="' + value + '"';
+     }
+     if (this._boundary)
+@@ -192,7 +192,7 @@ SyntheticPartMulti.prototype = {
+   BOUNDARY_COUNTER: 0,
+   toMessageString: function() {
+     let s = "This is a multi-part message in MIME format.\r\n";
+-    for (let [,part] in Iterator(this.parts)) {
++    for (let part of this.parts) {
+       s += "--" + this._boundary + "\r\n";
+       if (part instanceof SyntheticDegeneratePartEmpty)
+         continue;
+@@ -655,7 +655,7 @@ SyntheticMessage.prototype = {
+ function addMessagesToFolder (aMessages, aFolder)
+ {
+   let localFolder = aFolder.QueryInterface(Ci.nsIMsgLocalMailFolder);
+-  for (let [, message] in Iterator(aMessages))
++  for (let message of aMessages)
+     localFolder.addMessage(message.toMboxString());
+ }
+ 
+@@ -1020,13 +1020,13 @@ MessageGenerator.prototype = {
+     // zero out all the age_incr fields in age (if present)
+     if (aSetDef.age_incr) {
+       args.age = {};
+-      for (let [unit, delta] in Iterator(aSetDef.age_incr))
++      for (let [unit, delta] of Object.entries(aSetDef.age_incr))
+         args.age[unit] = 0;
+     }
+     // copy over the initial values from age (if present)
+     if (aSetDef.age) {
+       args.age = args.age || {};
+-      for (let [unit, value] in Iterator(aSetDef.age))
++      for (let [unit, value] of Object.entries(aSetDef.age))
+         args.age[unit] = value;
+     }
+     // just copy over any attributes found from MAKE_MESSAGES_PROPAGATE
+@@ -1048,7 +1048,7 @@ MessageGenerator.prototype = {
+       messages.push(lastMessage);
+ 
+       if (aSetDef.age_incr) {
+-        for (let [unit, delta] in Iterator(aSetDef.age_incr))
++        for (let [unit, delta] of Object.entries(aSetDef.age_incr))
+           args.age[unit] += delta;
+       }
+     }
+@@ -1143,7 +1143,7 @@ MessageScenarioFactory.prototype = {
+  *     probably be your prototype object.
+  */
+ function bindMethods(aObj) {
+-  for (let [name, ubfunc] in Iterator(aObj)) {
++  for (let [name, ubfunc] of Object.entries(aObj)) {
+     // the variable binding needs to get captured...
+     let realFunc = ubfunc;
+     delete aObj[name];
+diff --git a/mailnews/test/resources/messageModifier.js b/mailnews/test/resources/messageModifier.js
+--- a/mailnews/test/resources/messageModifier.js
++++ b/mailnews/test/resources/messageModifier.js
+@@ -127,7 +127,7 @@ SyntheticMessageSet.prototype = {
+   msgHdrs: function*() {
+     // get the databases
+     let msgDatabases = this.msgFolders.map(folder => folder.msgDatabase);
+-    for (let [iMsg, synMsg] in Iterator(this.synMessages)) {
++    for (let [iMsg, synMsg] of Object.entries(this.synMessages)) {
+       let folderIndex = this.folderIndices[iMsg];
+       if (folderIndex != null)
+         yield msgDatabases[folderIndex].getMsgHdrForMessageID(synMsg.messageId);
+@@ -155,7 +155,7 @@ SyntheticMessageSet.prototype = {
+    */
+   get foldersWithMsgHdrs() {
+     let results = this.msgFolders.map(folder => [folder, []]);
+-    for (let [iMsg, synMsg] in Iterator(this.synMessages)) {
++    for (let [iMsg, synMsg] of Object.entries(this.synMessages)) {
+       let folderIndex = this.folderIndices[iMsg];
+       if (folderIndex != null) {
+         let [folder, msgHdrs] = results[folderIndex];
