@@ -1,0 +1,261 @@
+# HG changeset patch
+# User Aman Dwivedi <dwivedi.aman96@gmail.com>
+# Date 1482404608 -19800
+#      Thu Dec 22 16:33:28 2016 +0530
+# Node ID 8285ccb40888c96f0d84221c11bede71439b389b
+# Parent  f179934df0c1bab590c558485d419c7910e41325
+Bug 1323685- Remove workarounds for bug 449811. r=mak
+
+diff --git a/browser/base/content/sanitize.js b/browser/base/content/sanitize.js
+--- a/browser/base/content/sanitize.js
++++ b/browser/base/content/sanitize.js
+@@ -157,9 +157,7 @@ Sanitizer.prototype = {
+     // `name` is the item's name and `promise` may be a promise, if the
+     // sanitization is asynchronous, or the function return value, otherwise.
+     let handles = [];
+-    for (let itemName of itemsToClear) {
+-      // Workaround for bug 449811.
+-      let name = itemName;
++    for (let name of itemsToClear) {
+       let item = this.items[name];
+       try {
+         // Catch errors here, so later we can just loop through these.
+diff --git a/browser/components/migration/MigrationUtils.jsm b/browser/components/migration/MigrationUtils.jsm
+--- a/browser/components/migration/MigrationUtils.jsm
++++ b/browser/components/migration/MigrationUtils.jsm
+@@ -294,21 +294,17 @@ this.MigratorPrototype = {
+         MigrationUtils._importQuantities[resourceType] = 0;
+       }
+       notify("Migration:Started");
+-      for (let [key, value] of resourcesGroupedByItems) {
+-        // Workaround bug 449811.
+-        let migrationType = key, itemResources = value;
++      for (let [migrationType, itemResources] of resourcesGroupedByItems) {
+ 
+         notify("Migration:ItemBeforeMigrate", migrationType);
+ 
+         let itemSuccess = false;
+         for (let res of itemResources) {
+-          // Workaround bug 449811.
+-          let resource = res;
+-          maybeStartTelemetryStopwatch(migrationType, resource);
++          maybeStartTelemetryStopwatch(migrationType, res);
+           let completeDeferred = PromiseUtils.defer();
+           let resourceDone = function(aSuccess) {
+-            maybeStopTelemetryStopwatch(migrationType, resource);
+-            itemResources.delete(resource);
++            maybeStopTelemetryStopwatch(migrationType, res);
++            itemResources.delete(res);
+             itemSuccess |= aSuccess;
+             if (itemResources.size == 0) {
+               notify(itemSuccess ?
+@@ -326,7 +322,7 @@ this.MigratorPrototype = {
+           // If migrate throws, an error occurred, and the callback
+           // (itemMayBeDone) might haven't been called.
+           try {
+-            resource.migrate(resourceDone);
++            res.migrate(resourceDone);
+           }
+           catch (ex) {
+             Cu.reportError(ex);
+diff --git a/devtools/client/responsive.html/browser/tunnel.js b/devtools/client/responsive.html/browser/tunnel.js
+--- a/devtools/client/responsive.html/browser/tunnel.js
++++ b/devtools/client/responsive.html/browser/tunnel.js
+@@ -488,13 +488,11 @@ MessageManagerTunnel.prototype = {
+ 
+   init() {
+     for (let method of this.PASS_THROUGH_METHODS) {
+-      // Workaround bug 449811 to ensure a fresh binding each time through the loop
+-      let _method = method;
+-      this[_method] = (...args) => {
++      this[method] = (...args) => {
+         if (!this.outerParentMM) {
+           return null;
+         }
+-        return this.outerParentMM[_method](...args);
++        return this.outerParentMM[method](...args);
+       };
+     }
+ 
+@@ -538,13 +536,11 @@ MessageManagerTunnel.prototype = {
+     // ensure it keeps working after tunnel close, rewrite the overidden methods as pass
+     // through methods.
+     for (let method of this.OVERRIDDEN_METHODS) {
+-      // Workaround bug 449811 to ensure a fresh binding each time through the loop
+-      let _method = method;
+-      this[_method] = (...args) => {
++      this[method] = (...args) => {
+         if (!this.outerParentMM) {
+           return null;
+         }
+-        return this.outerParentMM[_method](...args);
++        return this.outerParentMM[method](...args);
+       };
+     }
+   },
+diff --git a/toolkit/components/places/PlacesTransactions.jsm b/toolkit/components/places/PlacesTransactions.jsm
+--- a/toolkit/components/places/PlacesTransactions.jsm
++++ b/toolkit/components/places/PlacesTransactions.jsm
+@@ -743,9 +743,7 @@ DefineTransaction.inputProps = new Map()
+ DefineTransaction.defineInputProps =
+ function(aNames, aValidationFunction, aDefaultValue) {
+   for (let name of aNames) {
+-    // Workaround bug 449811.
+-    let propName = name;
+-    this.inputProps.set(propName, {
++    this.inputProps.set(name, {
+       validateValue: function(aValue) {
+         if (aValue === undefined)
+           return aDefaultValue;
+@@ -753,14 +751,14 @@ function(aNames, aValidationFunction, aD
+           return aValidationFunction(aValue);
+         }
+         catch (ex) {
+-          throw new Error(`Invalid value for input property ${propName}`);
++          throw new Error(`Invalid value for input property ${name}`);
+         }
+       },
+ 
+       validateInput: function(aInput, aRequired) {
+-        if (aRequired && !(propName in aInput))
+-          throw new Error(`Required input property is missing: ${propName}`);
+-        return this.validateValue(aInput[propName]);
++        if (aRequired && !(name in aInput))
++          throw new Error(`Required input property is missing: ${name}`);
++        return this.validateValue(aInput[name]);
+       },
+ 
+       isArrayProperty: false
+@@ -1517,20 +1515,18 @@ PT.Tag.prototype = {
+   execute: function* (aURIs, aTags) {
+     let onUndo = [], onRedo = [];
+     for (let uri of aURIs) {
+-      // Workaround bug 449811.
+-      let currentURI = uri;
+ 
+       let promiseIsBookmarked = function* () {
+         let deferred = Promise.defer();
+         PlacesUtils.asyncGetBookmarkIds(
+-          currentURI, ids => { deferred.resolve(ids.length > 0); });
++          uri, ids => { deferred.resolve(ids.length > 0); });
+         return deferred.promise;
+       };
+ 
+-      if (yield promiseIsBookmarked(currentURI)) {
++      if (yield promiseIsBookmarked(uri)) {
+         // Tagging is only allowed for bookmarked URIs (but see 424160).
+         let createTxn = TransactionsHistory.getRawTransaction(
+-          PT.NewBookmark({ url: currentURI
++          PT.NewBookmark({ url: uri
+                          , tags: aTags
+                          , parentGuid: PlacesUtils.bookmarks.unfiledGuid }));
+         yield createTxn.execute();
+@@ -1538,14 +1534,14 @@ PT.Tag.prototype = {
+         onRedo.push(createTxn.redo.bind(createTxn));
+       }
+       else {
+-        let currentTags = PlacesUtils.tagging.getTagsForURI(currentURI);
++        let currentTags = PlacesUtils.tagging.getTagsForURI(uri);
+         let newTags = aTags.filter(t => !currentTags.includes(t));
+-        PlacesUtils.tagging.tagURI(currentURI, newTags);
++        PlacesUtils.tagging.tagURI(uri, newTags);
+         onUndo.unshift(() => {
+-          PlacesUtils.tagging.untagURI(currentURI, newTags);
++          PlacesUtils.tagging.untagURI(uri, newTags);
+         });
+         onRedo.push(() => {
+-          PlacesUtils.tagging.tagURI(currentURI, newTags);
++          PlacesUtils.tagging.tagURI(uri, newTags);
+         });
+       }
+     }
+@@ -1575,20 +1571,18 @@ PT.Untag.prototype = {
+   execute: function* (aURIs, aTags) {
+     let onUndo = [], onRedo = [];
+     for (let uri of aURIs) {
+-      // Workaround bug 449811.
+-      let currentURI = uri;
+       let tagsToRemove;
+-      let tagsSet = PlacesUtils.tagging.getTagsForURI(currentURI);
++      let tagsSet = PlacesUtils.tagging.getTagsForURI(uri);
+       if (aTags.length > 0)
+         tagsToRemove = aTags.filter(t => tagsSet.includes(t));
+       else
+         tagsToRemove = tagsSet;
+-      PlacesUtils.tagging.untagURI(currentURI, tagsToRemove);
++      PlacesUtils.tagging.untagURI(uri, tagsToRemove);
+       onUndo.unshift(() => {
+-        PlacesUtils.tagging.tagURI(currentURI, tagsToRemove);
++        PlacesUtils.tagging.tagURI(uri, tagsToRemove);
+       });
+       onRedo.push(() => {
+-        PlacesUtils.tagging.untagURI(currentURI, tagsToRemove);
++        PlacesUtils.tagging.untagURI(uri, tagsToRemove);
+       });
+     }
+     this.undo = function* () {
+diff --git a/toolkit/components/places/nsLivemarkService.js b/toolkit/components/places/nsLivemarkService.js
+--- a/toolkit/components/places/nsLivemarkService.js
++++ b/toolkit/components/places/nsLivemarkService.js
+@@ -590,8 +590,6 @@ Livemark.prototype = {
+     let nodes = [];
+     let now = Date.now() * 1000;
+     for (let child of this.children) {
+-      // Workaround for bug 449811.
+-      let localChild = child;
+       let node = {
+         // The QueryInterface is needed cause aContainerNode is a jsval.
+         // This is required to avoid issues with scriptable wrappers that would
+@@ -603,13 +601,13 @@ Livemark.prototype = {
+           return this.parent.parentResult;
+         },
+         get uri() {
+-          return localChild.uri.spec;
++          return child.uri.spec;
+         },
+         get type() {
+           return Ci.nsINavHistoryResultNode.RESULT_TYPE_URI;
+         },
+         get title() {
+-          return localChild.title;
++          return child.title;
+         },
+         get accessCount() {
+           return Number(livemark._isURIVisited(NetUtil.newURI(this.uri)));
+@@ -681,12 +679,9 @@ Livemark.prototype = {
+       if (this._nodes.has(container)) {
+         let nodes = this._nodes.get(container);
+         for (let node of nodes) {
+-          // Workaround for bug 449811.
+-          let localObserver = observer;
+-          let localNode = node;
+           if (!aURI || node.uri == aURI.spec) {
+             Services.tm.mainThread.dispatch(() => {
+-              localObserver.nodeHistoryDetailsChanged(localNode, 0, aVisitedStatus);
++              observer.nodeHistoryDetailsChanged(node, 0, aVisitedStatus);
+             }, Ci.nsIThread.DISPATCH_NORMAL);
+           }
+         }
+diff --git a/toolkit/content/aboutSupport.js b/toolkit/content/aboutSupport.js
+--- a/toolkit/content/aboutSupport.js
++++ b/toolkit/content/aboutSupport.js
+@@ -507,14 +507,11 @@ var snapshotFormatters = {
+     if (crashGuards.length) {
+       for (let guard of crashGuards) {
+         let resetButton = $.new("button");
+-        let onClickReset = (function(guard) {
+-          // Note - need this wrapper until bug 449811 fixes |guard| scoping.
+-          return function() {
+-            Services.prefs.setIntPref(guard.prefName, 0);
+-            resetButton.removeEventListener("click", onClickReset);
+-            resetButton.disabled = true;
+-          };
+-        })(guard);
++        onClickReset = function() {
++          Services.prefs.setIntPref(guard.prefName, 0);
++          resetButton.removeEventListener("click", onClickReset);
++          resetButton.disabled = true;
++        };
+ 
+         resetButton.textContent = strings.GetStringFromName("resetOnNextRestart");
+         resetButton.addEventListener("click", onClickReset);

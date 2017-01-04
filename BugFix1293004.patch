@@ -1,0 +1,20 @@
+# HG changeset patch
+# User Aman Dwivedi <dwivedi.aman96@gmail.com>
+# Date 1483440903 -19800
+#      Tue Jan 03 16:25:03 2017 +0530
+# Node ID e0e6bc4f9ac16e15f98603deadeb2e9e6edc98b6
+# Parent  bbb39b5643e82496474bcf9c7dbfaaf34bf0e89f
+Bug 1293004 - Replace in-tree consumer of non-standard Iterator() with Object.{values,entries} in chat/ in comm-central, r=arai.
+
+diff --git a/chat/modules/jsProtoHelper.jsm b/chat/modules/jsProtoHelper.jsm
+--- a/chat/modules/jsProtoHelper.jsm
++++ b/chat/modules/jsProtoHelper.jsm
+@@ -874,7 +874,7 @@ var GenericProtocolPrototype = {
+       return EmptyEnumerator;
+ 
+     let purplePrefs = [];
+-    for (let [name, option] in Iterator(this.options))
++    for (let [name, option] of Object.entries(this.options))
+       purplePrefs.push(new purplePref(name, option));
+     return new nsSimpleEnumerator(purplePrefs);
+   },

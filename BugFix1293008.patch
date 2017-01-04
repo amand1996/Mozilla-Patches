@@ -1,0 +1,128 @@
+# HG changeset patch
+# User Aman Dwivedi <dwivedi.aman96@gmail.com>
+# Date 1483531288 -19800
+#      Wed Jan 04 17:31:28 2017 +0530
+# Node ID 1c3b6e85089ae192e6367b45f7a552e444229d9e
+# Parent  bbb39b5643e82496474bcf9c7dbfaaf34bf0e89f
+Bug 1293008 - Replace in-tree consumer of non-standard Iterator() with Object.{values,entries} in suite/ in comm-central, r=arai.
+
+diff --git a/suite/browser/test/browser/browser_popupNotification.js b/suite/browser/test/browser/browser_popupNotification.js
+--- a/suite/browser/test/browser/browser_popupNotification.js
++++ b/suite/browser/test/browser/browser_popupNotification.js
+@@ -144,7 +144,7 @@ function basicNotification() {
+     }
+   };
+   this.addOptions = function(options) {
+-    for (let [name, value] in Iterator(options))
++    for (let [name, value] of Object.entries(options))
+       self.options[name] = value;
+   }
+ }
+diff --git a/suite/common/src/nsSessionStore.js b/suite/common/src/nsSessionStore.js
+--- a/suite/common/src/nsSessionStore.js
++++ b/suite/common/src/nsSessionStore.js
+@@ -2020,7 +2020,7 @@ SessionStoreService.prototype = {
+         }, this);
+       }, this);
+ 
+-      for (var [host, isPinned] in Iterator(hosts)) {
++      for (var [host, isPinned] of Object.entries(hosts)) {
+         try {
+           var list = Services.cookies.getCookiesFromHost(host, {});
+           while (list.hasMoreElements()) {
+diff --git a/suite/common/sync/aboutSyncTabs.js b/suite/common/sync/aboutSyncTabs.js
+--- a/suite/common/sync/aboutSyncTabs.js
++++ b/suite/common/sync/aboutSyncTabs.js
+@@ -142,7 +142,7 @@ var RemoteTabViewer = {
+     let seenURLs = new Set();
+     let localURLs = engine.getOpenURLs();
+ 
+-    for (let [guid, client] in Iterator(engine.getAllClients())) {
++    for (let [guid, client] of Object.entries(engine.getAllClients())) {
+       let appendClient = true;
+ 
+       client.tabs.forEach(function({title, urlHistory, icon}) {
+diff --git a/suite/common/sync/syncUI.js b/suite/common/sync/syncUI.js
+--- a/suite/common/sync/syncUI.js
++++ b/suite/common/sync/syncUI.js
+@@ -338,7 +338,7 @@ var gSyncUI = {
+ 
+     // Check if the client is outdated in some way
+     let outdated = Weave.Status.sync == Weave.VERSION_OUT_OF_DATE;
+-    for (let [engine, reason] in Iterator(Weave.Status.engines))
++    for (let [engine, reason] of Object.entries(Weave.Status.engines))
+       outdated = outdated || reason == Weave.VERSION_OUT_OF_DATE;
+ 
+     if (outdated) {
+diff --git a/suite/common/tests/browser/browser_615394-SSWindowState_events.js b/suite/common/tests/browser/browser_615394-SSWindowState_events.js
+--- a/suite/common/tests/browser/browser_615394-SSWindowState_events.js
++++ b/suite/common/tests/browser/browser_615394-SSWindowState_events.js
+@@ -289,7 +289,7 @@ function test_setBrowserState() {
+ 
+   waitForBrowserState(lameMultiWindowState, function() {
+     let checkedWindows = 0;
+-    for (let [id, winEvents] of Iterator(windowEvents)) {
++    for (let [id, winEvents] of Object.entries(windowEvents)) {
+       is(winEvents.busyEventCount, 1,
+          "[test_setBrowserState] window" + id + " busy event count correct");
+       is(winEvents.readyEventCount, 1,
+diff --git a/suite/mailnews/tabmail.xml b/suite/mailnews/tabmail.xml
+--- a/suite/mailnews/tabmail.xml
++++ b/suite/mailnews/tabmail.xml
+@@ -296,7 +296,7 @@
+             if (aTabType.name in this.tabTypes)
+               return;
+             this.tabTypes[aTabType.name] = aTabType;
+-            for (let [modeName, modeDetails] in Iterator(aTabType.modes))
++            for (let [modeName, modeDetails] of Object.entries(aTabType.modes))
+             {
+               modeDetails.name = modeName;
+               modeDetails.tabType = aTabType;
+@@ -353,7 +353,7 @@
+               this.setTabTitle(firstTabInfo);
+               if (this.tabMonitors.length)
+               {
+-                for (let [i, tabMonitor] in Iterator(this.tabMonitors))
++                for (let tabMonitor of this.tabMonitors)
+                   tabMonitor.onTabSwitched(firstTabInfo, null);
+               }
+             }
+@@ -481,7 +481,7 @@
+             if (this.tabMonitors.length)
+             {
+               if (switchToNewTab)
+-                for (let [i, tabMonitor] in Iterator(this.tabMonitors))
++                for (let tabMonitor of this.tabMonitors)
+                   tabMonitor.onTabSwitched(tabInfo, oldTabInfo);
+             }
+ 
+@@ -631,7 +631,7 @@
+                 showTabFunc.call(tabInfo.mode.tabType, tabInfo);
+               if (this.tabMonitors.length)
+               {
+-                for (let [i, tabMonitor] in Iterator(this.tabMonitors))
++                for (let tabMonitor of this.tabMonitors)
+                   tabMonitor.onTabSwitched(tabInfo, oldTabInfo);
+               }
+ 
+@@ -717,7 +717,7 @@
+                 titleChangeFunc.call(tabInfo.mode.tabType, tabInfo, tabNode);
+               if (this.tabMonitors.length)
+               {
+-                for (let [i, tabMonitor] in Iterator(this.tabMonitors))
++                for (let tabMonitor of this.tabMonitors)
+                   tabMonitor.onTabTitleChanged(tabInfo);
+               }
+               tabNode.setAttribute("label", tabInfo.title);
+diff --git a/suite/modules/PlacesUIUtils.jsm b/suite/modules/PlacesUIUtils.jsm
+--- a/suite/modules/PlacesUIUtils.jsm
++++ b/suite/modules/PlacesUIUtils.jsm
+@@ -1300,7 +1300,7 @@ var PlacesUIUtils = {
+     else {
+       // If the left pane has already been built, use the name->id map
+       // cached in PlacesUIUtils.
+-      for (let [name, id] in Iterator(this.leftPaneQueries)) {
++      for (let [name, id] of Object.entries(this.leftPaneQueries)) {
+         if (aItemId == id)
+           queryName = name;
+       }

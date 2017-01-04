@@ -1,0 +1,41 @@
+# HG changeset patch
+# User Aman Dwivedi <dwivedi.aman96@gmail.com>
+# Date 1483442194 -19800
+#      Tue Jan 03 16:46:34 2017 +0530
+# Node ID c5cd057748c22d998e35d2e2247898eb5a46c2c9
+# Parent  bbb39b5643e82496474bcf9c7dbfaaf34bf0e89f
+Bug 1293005 - Replace in-tree consumer of non-standard Iterator() with Object.{values,entries} in im/ in comm-central, r=arai.
+
+diff --git a/im/content/extensions.js b/im/content/extensions.js
+--- a/im/content/extensions.js
++++ b/im/content/extensions.js
+@@ -108,7 +108,7 @@ var addonsRegister = {
+       break;
+     case "addon-install-failed":
+       // XXX TODO This isn't terribly ideal for the multiple failure case
+-      for (let [, install] in Iterator(installInfo.installs)) {
++      for (let install of installInfo.installs) {
+         let host = ((installInfo.originatingURI instanceof Ci.nsIStandardURL) &&
+                     installInfo.originatingURI.host) ||
+                    ((install.sourceURI instanceof Ci.nsIStandardURL) &&
+@@ -174,7 +174,7 @@ var addonsRegister = {
+         // installs.
+         let types = {};
+         let bestType = null;
+-        for (let [, install] in Iterator(installInfo.installs)) {
++        for (let install of installInfo.installs) {
+           if (install.type in types)
+             types[install.type]++;
+           else
+diff --git a/im/content/jsTreeView.js b/im/content/jsTreeView.js
+--- a/im/content/jsTreeView.js
++++ b/im/content/jsTreeView.js
+@@ -124,7 +124,7 @@ PROTO_TREE_VIEW.prototype = {
+     // for the next add item at our own level.
+     let currentCount = this._rowMap.length;
+     if (aChild.children.length && aChild.open) {
+-      for (let [i, child] in Iterator(this._rowMap[aNewIndex].children)) {
++      for (let [i, child] of Array.from(this._rowMap[aNewIndex].children).entries()) {
+         let index = aNewIndex + i + 1;
+         this._rowMap.splice(index, 0, child);
+         aNewIndex += this.recursivelyAddToMap(child, index);
