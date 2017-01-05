@@ -1,8 +1,8 @@
 # HG changeset patch
 # User Aman Dwivedi <dwivedi.aman96@gmail.com>
-# Date 1483554454 -19800
-#      Wed Jan 04 23:57:34 2017 +0530
-# Node ID 6898961f9468ab7682c9306b486012ec6329af00
+# Date 1483604021 -19800
+#      Thu Jan 05 13:43:41 2017 +0530
+# Node ID b7fb81a700ed09b55394401a32d7f0a3c6f9683a
 # Parent  bbb39b5643e82496474bcf9c7dbfaaf34bf0e89f
 Bug 1293007 - Replace in-tree consumer of non-standard Iterator() with Object.{values,entries} in mailnews/ in comm-central, r=arai.
 
@@ -26,7 +26,7 @@ diff --git a/mailnews/base/test/unit/test_autoconfigUtils.js b/mailnews/base/tes
  {
    assert_equal(aA.length, aB.length, "tryOrders have different length");
 -  for (let [i,subA] in Iterator(aA)) {
-+  for (let [i,subA] of Object.entries(aA)) {
++  for (let [i,subA] of aA.entries()) {
      let subB = aB[i];
      assert_equal_host_entries(subA, subB);
    }
@@ -38,7 +38,7 @@ diff --git a/mailnews/base/test/unit/test_iteratorUtils.js b/mailnews/base/test/
    let childArray = iteratorUtils.toArray(childNodes);
    do_check_eq(childNodes.length, childArray.length);
 -  for (let [i, node] in Iterator(childArray))
-+  for (let [i, node] of Object.entries(childArray))
++  for (let [i, node] of childArray.entries())
      do_check_eq(node, childArray[i]);
  }
  
@@ -47,7 +47,7 @@ diff --git a/mailnews/base/test/unit/test_iteratorUtils.js b/mailnews/base/test/
    let iteratorArray = iteratorUtils.toArray(iterator);
    do_check_eq(arr.length, iteratorArray.length);
 -  for (let [i, val] in Iterator(arr)) {
-+  for (let [i, val] of Object.entries(arr)) {
++  for (let [i, val] of arr.entries()) {
      do_check_eq(i, iteratorArray[i][0]);
      do_check_eq(val, iteratorArray[i][1]);
    }
@@ -56,7 +56,7 @@ diff --git a/mailnews/base/test/unit/test_iteratorUtils.js b/mailnews/base/test/
    let iteratorArray = iteratorUtils.toArray(iterator);
    do_check_eq(arr.length, iteratorArray.length);
 -  for (let [i, val] in Iterator(arr))
-+  for (let [i, val] of Object.entries(arr))
++  for (let [i, val] of arr.entries())
      do_check_eq(val, iteratorArray[i]);
  }
  
@@ -160,7 +160,7 @@ diff --git a/mailnews/db/gloda/modules/datastore.js b/mailnews/db/gloda/modules/
        aExistingCollection, aMasterCollection) {
      let statement = this._createAsyncStatement(aSqlString, true);
 -    for (let [iBinding, bindingValue] in Iterator(aBoundArgs)) {
-+    for (let [iBinding, bindingValue] of Object.entries(aBoundArgs)) {
++    for (let [iBinding, bindingValue] of aBoundArgs.entries()) {
        this._bindVariant(statement, iBinding, bindingValue);
      }
  
@@ -230,7 +230,7 @@ diff --git a/mailnews/db/gloda/test/unit/test_fts3_tokenizer.js b/mailnews/db/gl
    // Bind the parameters
    let stmt = conn.createStatement(sql);
 -  for (let [iBinding, bindingValue] in Iterator(args)) {
-+  for (let [iBinding, bindingValue] of Object.entries(args)) {
++  for (let [iBinding, bindingValue] of args.entries()) {
      GlodaDatastore._bindVariant(stmt, iBinding, bindingValue);
    }
  
@@ -254,7 +254,7 @@ diff --git a/mailnews/test/resources/mailTestUtils.js b/mailnews/test/resources/
     */
    non_strict_index_of: function(aArray, aElem) {
 -    for (let [i, elem] in Iterator(aArray)) {
-+    for (let [i, elem] of Object.entries(aArray)) {
++    for (let [i, elem] of aArray.entries()) {
        if (elem == aElem)
          return i;
      }
@@ -330,7 +330,7 @@ diff --git a/mailnews/test/resources/messageModifier.js b/mailnews/test/resource
      // get the databases
      let msgDatabases = this.msgFolders.map(folder => folder.msgDatabase);
 -    for (let [iMsg, synMsg] in Iterator(this.synMessages)) {
-+    for (let [iMsg, synMsg] of Object.entries(this.synMessages)) {
++    for (let [iMsg, synMsg] of this.synMessages.entries()) {
        let folderIndex = this.folderIndices[iMsg];
        if (folderIndex != null)
          yield msgDatabases[folderIndex].getMsgHdrForMessageID(synMsg.messageId);
@@ -339,7 +339,7 @@ diff --git a/mailnews/test/resources/messageModifier.js b/mailnews/test/resource
    get foldersWithMsgHdrs() {
      let results = this.msgFolders.map(folder => [folder, []]);
 -    for (let [iMsg, synMsg] in Iterator(this.synMessages)) {
-+    for (let [iMsg, synMsg] of Object.entries(this.synMessages)) {
++    for (let [iMsg, synMsg] of this.synMessages.entries()) {
        let folderIndex = this.folderIndices[iMsg];
        if (folderIndex != null) {
          let [folder, msgHdrs] = results[folderIndex];
