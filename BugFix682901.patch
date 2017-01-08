@@ -1,0 +1,73 @@
+# HG changeset patch
+# User Aman Dwivedi <dwivedi.aman96@gmail.com>
+# Date 1483909890 -19800
+#      Mon Jan 09 02:41:30 2017 +0530
+# Node ID 356a83d1c9e1946e86e8e44ef3cd4937271d257b
+# Parent  d192a99be4b436f2dc839435319f7630d5d8f4b0
+Bug 682901 - catch the case where .finish() gets called before waitForExplicitFinish(), r=jdm.
+
+diff --git a/testing/mochitest/tests/Harness_sanity/mochitest.ini b/testing/mochitest/tests/Harness_sanity/mochitest.ini
+--- a/testing/mochitest/tests/Harness_sanity/mochitest.ini
++++ b/testing/mochitest/tests/Harness_sanity/mochitest.ini
+@@ -42,3 +42,4 @@ skip-if = toolkit == 'android' # we use 
+ fail-if = true
+ [test_spawn_task.html]
+ [test_sanity_waitForCondition.html]
++[test_bug682901.html]
+\ No newline at end of file
+diff --git a/testing/mochitest/tests/Harness_sanity/test_bug682901.html b/testing/mochitest/tests/Harness_sanity/test_bug682901.html
+new file mode 100644
+--- /dev/null
++++ b/testing/mochitest/tests/Harness_sanity/test_bug682901.html
+@@ -0,0 +1,28 @@
++<!DOCTYPE HTML>
++<html>
++<!--
++https://bugzilla.mozilla.org/show_bug.cgi?id=682901
++-->
++<head>
++  <title>Test for Bug 682901</title>
++  <script type="text/javascript" src="/MochiKit/MochiKit.js"></script>
++  <script type="text/javascript" src="/tests/SimpleTest/SimpleTest.js"></script>
++  <link rel="stylesheet" type="text/css" href="/tests/SimpleTest/test.css" />
++</head>
++<body>
++<a target="_blank" href="https://bugzilla.mozilla.org/show_bug.cgi?id=682901">Mozilla Bug 682901</a>
++<p id="display"></p>
++<div id="content" style="display: none">
++  
++</div>
++<pre id="test">
++<script class="testbody" type="text/javascript">
++/** Test for Bug 682901 **/
++SimpleTest.expectUncaughtException();
++throw "an uncaught exception";
++SimpleTest.waitForExplicitFinish();
++SimpleTest.finish();
++</script>
++</pre>
++</body>
++</html>
+diff --git a/testing/mochitest/tests/SimpleTest/SimpleTest.js b/testing/mochitest/tests/SimpleTest/SimpleTest.js
+--- a/testing/mochitest/tests/SimpleTest/SimpleTest.js
++++ b/testing/mochitest/tests/SimpleTest/SimpleTest.js
+@@ -1063,6 +1063,11 @@ SimpleTest.timeout = function() {
+  * SimpleTest.waitForExplicitFinish() has been invoked.
+ **/
+ SimpleTest.finish = function() {
++    /* disallow calling finish before waitForExplicitFinish
++    */
++    if (SimpleTest._stopOnLoad) {
++        SimpleTest.ok(false, "[SimpleTest.finish()] waitForExplicitFinish() has not been invoked");
++    }
+     if (SimpleTest._alreadyFinished) {
+         var err = "[SimpleTest.finish()] this test already called finish!";
+         if (parentRunner) {
+@@ -1371,6 +1376,7 @@ SimpleTest.reset = function () {
+ if (isPrimaryTestWindow) {
+     addLoadEvent(function() {
+         if (SimpleTest._stopOnLoad) {
++            SimpleTest._stopOnLoad = false;
+             SimpleTest.finish();
+         }
+     });

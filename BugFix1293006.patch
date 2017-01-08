@@ -4,7 +4,7 @@
 #      Thu Jan 05 15:38:16 2017 +0530
 # Node ID 878258294a797988f8e1ef61bbaa8b56e4ca1979
 # Parent  bbb39b5643e82496474bcf9c7dbfaaf34bf0e89f
-Bug 1293006 - Replace in-tree consumer of non-standard Iterator() with Object.{values,entries} in mail/ in comm-central, r=arai.
+Bug 1293006 - Replace in-tree consumer of non-standard Iterator() with Object.{values,entries} in mail/ in comm-central, r=mkmelin.
 
 diff --git a/mail/base/content/folderPane.js b/mail/base/content/folderPane.js
 --- a/mail/base/content/folderPane.js
