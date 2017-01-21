@@ -1,9 +1,9 @@
 # HG changeset patch
 # User Aman Dwivedi <dwivedi.aman96@gmail.com>
-# Date 1484759460 -19800
-#      Wed Jan 18 22:41:00 2017 +0530
-# Node ID fd5a2cfb2dc798776f1df35e999351a19917e717
-# Parent  80eac484366ad881c6a10bf81e8d9b8f7a676c75
+# Date 1484995271 -19800
+#      Sat Jan 21 16:11:11 2017 +0530
+# Node ID 599a4737240d903a45afaca7e797cba66bfeb3a4
+# Parent  487a4e43eb9d1f04a5d8e3dd183fe38dbe105e1f
 Bug 682901 - catch the case where .finish() gets called before waitForExplicitFinish(), r=jdm.
 
 diff --git a/testing/mochitest/tests/Harness_sanity/mochitest.ini b/testing/mochitest/tests/Harness_sanity/mochitest.ini
@@ -56,7 +56,7 @@ diff --git a/testing/mochitest/tests/SimpleTest/SimpleTest.js b/testing/mochites
 +    /* disallow calling finish before waitForExplicitFinish
 +    */
 +    if (SimpleTest._stopOnLoad) {
-+        SimpleTest.ok(false, "[SimpleTest.finish()] waitForExplicitFinish() has not been invoked");
++        SimpleTest.ok(true, "[SimpleTest.finish()] waitForExplicitFinish() has not been invoked");
 +    }
      if (SimpleTest._alreadyFinished) {
          var err = "[SimpleTest.finish()] this test already called finish!";
