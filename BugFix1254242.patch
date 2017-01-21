@@ -1,0 +1,41 @@
+# HG changeset patch
+# User Aman Dwivedi <dwivedi.aman96@gmail.com>
+# Date 1484993851 -19800
+#      Sat Jan 21 15:47:31 2017 +0530
+# Node ID f7330038f0c8588351f103727d7be60215d50501
+# Parent  487a4e43eb9d1f04a5d8e3dd183fe38dbe105e1f
+Bug 1254242 - Clean up React propType definitions, r=pbro.
+
+diff --git a/devtools/client/memory/components/toolbar.js b/devtools/client/memory/components/toolbar.js
+--- a/devtools/client/memory/components/toolbar.js
++++ b/devtools/client/memory/components/toolbar.js
+@@ -13,9 +13,7 @@ module.exports = createClass({
+   displayName: "Toolbar",
+ 
+   propTypes: {
+-    censusDisplays: PropTypes.arrayOf(PropTypes.shape({
+-      displayName: PropTypes.string.isRequired,
+-    })).isRequired,
++    censusDisplays: PropTypes.arrayOf(models.censusDisplay).isRequired,
+     censusDisplay: PropTypes.shape({
+       displayName: PropTypes.string.isRequired,
+     }).isRequired,
+@@ -31,16 +29,12 @@ module.exports = createClass({
+     onToggleDiffing: PropTypes.func.isRequired,
+     view: models.view.isRequired,
+     onViewChange: PropTypes.func.isRequired,
+-    labelDisplays: PropTypes.arrayOf(PropTypes.shape({
+-      displayName: PropTypes.string.isRequired,
+-    })).isRequired,
++    labelDisplays: PropTypes.arrayOf(models.labelDisplay).isRequired,
+     labelDisplay: PropTypes.shape({
+       displayName: PropTypes.string.isRequired,
+     }).isRequired,
+     onLabelDisplayChange: PropTypes.func.isRequired,
+-    treeMapDisplays: PropTypes.arrayOf(PropTypes.shape({
+-      displayName: PropTypes.string.isRequired,
+-    })).isRequired,
++    treeMapDisplays: PropTypes.arrayOf(models.treeMapDisplay).isRequired,
+     onTreeMapDisplayChange: PropTypes.func.isRequired,
+     snapshots: PropTypes.arrayOf(models.snapshot).isRequired,
+   },

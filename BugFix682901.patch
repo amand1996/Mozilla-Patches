@@ -1,9 +1,9 @@
 # HG changeset patch
 # User Aman Dwivedi <dwivedi.aman96@gmail.com>
-# Date 1483909890 -19800
-#      Mon Jan 09 02:41:30 2017 +0530
-# Node ID 356a83d1c9e1946e86e8e44ef3cd4937271d257b
-# Parent  d192a99be4b436f2dc839435319f7630d5d8f4b0
+# Date 1484759460 -19800
+#      Wed Jan 18 22:41:00 2017 +0530
+# Node ID fd5a2cfb2dc798776f1df35e999351a19917e717
+# Parent  80eac484366ad881c6a10bf81e8d9b8f7a676c75
 Bug 682901 - catch the case where .finish() gets called before waitForExplicitFinish(), r=jdm.
 
 diff --git a/testing/mochitest/tests/Harness_sanity/mochitest.ini b/testing/mochitest/tests/Harness_sanity/mochitest.ini
@@ -13,13 +13,13 @@ diff --git a/testing/mochitest/tests/Harness_sanity/mochitest.ini b/testing/moch
  fail-if = true
  [test_spawn_task.html]
  [test_sanity_waitForCondition.html]
-+[test_bug682901.html]
++[test_finish_called_before_waitForExplicitFinish.html]
 \ No newline at end of file
-diff --git a/testing/mochitest/tests/Harness_sanity/test_bug682901.html b/testing/mochitest/tests/Harness_sanity/test_bug682901.html
+diff --git a/testing/mochitest/tests/Harness_sanity/test_finish_called_before_waitForExplicitFinish.html b/testing/mochitest/tests/Harness_sanity/test_finish_called_before_waitForExplicitFinish.html
 new file mode 100644
 --- /dev/null
-+++ b/testing/mochitest/tests/Harness_sanity/test_bug682901.html
-@@ -0,0 +1,28 @@
++++ b/testing/mochitest/tests/Harness_sanity/test_finish_called_before_waitForExplicitFinish.html
+@@ -0,0 +1,26 @@
 +<!DOCTYPE HTML>
 +<html>
 +<!--
@@ -40,10 +40,8 @@ new file mode 100644
 +<pre id="test">
 +<script class="testbody" type="text/javascript">
 +/** Test for Bug 682901 **/
-+SimpleTest.expectUncaughtException();
-+throw "an uncaught exception";
-+SimpleTest.waitForExplicitFinish();
 +SimpleTest.finish();
++SimpleTest.waitForExplicitFinish();
 +</script>
 +</pre>
 +</body>
