@@ -1,9 +1,9 @@
 # HG changeset patch
 # User Aman Dwivedi <dwivedi.aman96@gmail.com>
-# Date 1485422606 -19800
-#      Thu Jan 26 14:53:26 2017 +0530
-# Node ID 50e99b18b2eb0a0a937e670d418034fe1e885d3d
-# Parent  fbdfcecf0c774d2221f11aed5a504d5591c774e0
+# Date 1485499704 -19800
+#      Fri Jan 27 12:18:24 2017 +0530
+# Node ID f1b257e0b43f6f977cc9ce927cac200e38fdfb1d
+# Parent  1e0e193b0812f68a12fbd69198552af62347af1e
 Bug 682901 - catch the case where .finish() gets called before waitForExplicitFinish(), r=jdm.
 
 diff --git a/testing/mochitest/tests/Harness_sanity/mochitest.ini b/testing/mochitest/tests/Harness_sanity/mochitest.ini
@@ -19,7 +19,7 @@ diff --git a/testing/mochitest/tests/Harness_sanity/test_finish_called_before_wa
 new file mode 100644
 --- /dev/null
 +++ b/testing/mochitest/tests/Harness_sanity/test_finish_called_before_waitForExplicitFinish.html
-@@ -0,0 +1,27 @@
+@@ -0,0 +1,26 @@
 +<!DOCTYPE HTML>
 +<html>
 +<!--
@@ -42,7 +42,6 @@ new file mode 100644
 +/** Test for Bug 682901 **/
 +SimpleTest.expectExplicitFinish();
 +SimpleTest.finish();
-+SimpleTest.waitForExplicitFinish();
 +</script>
 +</pre>
 +</body>
@@ -50,24 +49,19 @@ new file mode 100644
 diff --git a/testing/mochitest/tests/SimpleTest/SimpleTest.js b/testing/mochitest/tests/SimpleTest/SimpleTest.js
 --- a/testing/mochitest/tests/SimpleTest/SimpleTest.js
 +++ b/testing/mochitest/tests/SimpleTest/SimpleTest.js
-@@ -1063,6 +1063,16 @@ SimpleTest.timeout = function() {
+@@ -1063,6 +1063,11 @@ SimpleTest.timeout = function() {
   * SimpleTest.waitForExplicitFinish() has been invoked.
  **/
  SimpleTest.finish = function() {
 +    /* disallow calling finish before waitForExplicitFinish
 +    */
 +    if (SimpleTest._stopOnLoad) {
-+        if (SimpleTest._expectingExplicitFinish) {
-+            SimpleTest.ok(true, "[SimpleTest.finish()] waitForExplicitFinish() has been invoked");
-+        }
-+        else {
-+            SimpleTest.ok(false, "[SimpleTest.finish()] waitForExplicitFinish() has not been invoked");
-+        }
++        SimpleTest.ok(SimpleTest._expectingExplicitFinish, "[SimpleTest.finish()] waitForExplicitFinish() has not been invoked");
 +    }
      if (SimpleTest._alreadyFinished) {
          var err = "[SimpleTest.finish()] this test already called finish!";
          if (parentRunner) {
-@@ -1356,6 +1366,10 @@ SimpleTest.expectRegisteredServiceWorker
+@@ -1356,6 +1361,10 @@ SimpleTest.expectRegisteredServiceWorker
      SimpleTest._expectingRegisteredServiceWorker = true;
  };
  
@@ -78,7 +72,7 @@ diff --git a/testing/mochitest/tests/SimpleTest/SimpleTest.js b/testing/mochites
  /**
   * Resets any state this SimpleTest object has.  This is important for
   * browser chrome mochitests, which reuse the same SimpleTest object
-@@ -1371,6 +1385,7 @@ SimpleTest.reset = function () {
+@@ -1371,6 +1380,7 @@ SimpleTest.reset = function () {
  if (isPrimaryTestWindow) {
      addLoadEvent(function() {
          if (SimpleTest._stopOnLoad) {
