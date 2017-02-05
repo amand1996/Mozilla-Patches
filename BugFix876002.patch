@@ -1,119 +1,104 @@
 # HG changeset patch
 # User Aman Dwivedi <dwivedi.aman96@gmail.com>
-# Date 1485425077 -19800
-#      Thu Jan 26 15:34:37 2017 +0530
-# Node ID d9c06ecbb5a45c36adf698680757460652423223
-# Parent  fbdfcecf0c774d2221f11aed5a504d5591c774e0
-Bug 876002 - (killSyncFormHistory) Breakdown: Remove nsIFormHistory2 so no synchronous form history code remains, r=markh.
+# Date 1486277389 -19800
+#      Sun Feb 05 12:19:49 2017 +0530
+# Node ID b2a5529b32ee040e97185307142b0f9d15190780
+# Parent  1e0e193b0812f68a12fbd69198552af62347af1e
+Bug 876002 - (killSyncFormHistory) Breakdown: Remove nsIFormHistory2 so no synchronous form history code remains, r=markh
 
+diff --git a/b2g/installer/package-manifest.in b/b2g/installer/package-manifest.in
+--- a/b2g/installer/package-manifest.in
++++ b/b2g/installer/package-manifest.in
+@@ -491,7 +491,6 @@
+ @RESPATH@/components/nsWebHandlerApp.js
+ @RESPATH@/components/satchel.manifest
+ @RESPATH@/components/nsFormAutoComplete.js
+-@RESPATH@/components/nsFormHistory.js
+ @RESPATH@/components/FormHistoryStartup.js
+ @RESPATH@/components/nsInputListAutoComplete.js
+ @RESPATH@/components/formautofill.manifest
+diff --git a/browser/installer/package-manifest.in b/browser/installer/package-manifest.in
+--- a/browser/installer/package-manifest.in
++++ b/browser/installer/package-manifest.in
+@@ -464,7 +464,6 @@
+ @RESPATH@/components/nsWebHandlerApp.js
+ @RESPATH@/components/satchel.manifest
+ @RESPATH@/components/nsFormAutoComplete.js
+-@RESPATH@/components/nsFormHistory.js
+ @RESPATH@/components/FormHistoryStartup.js
+ @RESPATH@/components/nsInputListAutoComplete.js
+ @RESPATH@/components/formautofill.manifest
+diff --git a/mobile/android/base/java/org/mozilla/gecko/db/FormHistoryProvider.java b/mobile/android/base/java/org/mozilla/gecko/db/FormHistoryProvider.java
+--- a/mobile/android/base/java/org/mozilla/gecko/db/FormHistoryProvider.java
++++ b/mobile/android/base/java/org/mozilla/gecko/db/FormHistoryProvider.java
+@@ -30,7 +30,6 @@ public class FormHistoryProvider extends
+     private static final UriMatcher URI_MATCHER;
+ 
+ 
+-    // This should be kept in sync with the db version in toolkit/components/satchel/nsFormHistory.js
+     private static final int DB_VERSION = 4;
+     private static final String DB_FILENAME = "formhistory.sqlite";
+     private static final String TELEMETRY_TAG = "SQLITEBRIDGE_PROVIDER_FORMS";
+diff --git a/mobile/android/installer/package-manifest.in b/mobile/android/installer/package-manifest.in
+--- a/mobile/android/installer/package-manifest.in
++++ b/mobile/android/installer/package-manifest.in
+@@ -335,7 +335,6 @@
+ @BINPATH@/components/nsWebHandlerApp.js
+ @BINPATH@/components/satchel.manifest
+ @BINPATH@/components/nsFormAutoComplete.js
+-@BINPATH@/components/nsFormHistory.js
+ @BINPATH@/components/FormHistoryStartup.js
+ @BINPATH@/components/nsInputListAutoComplete.js
+ @BINPATH@/components/formautofill.manifest
 diff --git a/services/common/tests/unit/test_async_querySpinningly.js b/services/common/tests/unit/test_async_querySpinningly.js
-deleted file mode 100644
 --- a/services/common/tests/unit/test_async_querySpinningly.js
-+++ /dev/null
-@@ -1,103 +0,0 @@
--/* Any copyright is dedicated to the Public Domain.
-- * http://creativecommons.org/publicdomain/zero/1.0/ */
--
--Cu.import("resource://gre/modules/XPCOMUtils.jsm");
--Cu.import("resource://services-common/async.js");
--Cu.import("resource://services-common/utils.js");
--
--_("Make sure querySpinningly will synchronously fetch rows for a query asyncly");
--
--const SQLITE_CONSTRAINT_VIOLATION = 19;  // http://www.sqlite.org/c3ref/c_abort.html
--
++++ b/services/common/tests/unit/test_async_querySpinningly.js
+@@ -2,6 +2,8 @@
+  * http://creativecommons.org/publicdomain/zero/1.0/ */
+ 
+ Cu.import("resource://gre/modules/XPCOMUtils.jsm");
++Cu.import("resource://gre/modules/Services.jsm");
++Cu.import("resource://gre/modules/FormHistory.jsm");
+ Cu.import("resource://services-common/async.js");
+ Cu.import("resource://services-common/utils.js");
+ 
+@@ -9,13 +11,22 @@ Cu.import("resource://services-common/ut
+ 
+ const SQLITE_CONSTRAINT_VIOLATION = 19;  // http://www.sqlite.org/c3ref/c_abort.html
+ 
 -var Svc = {};
 -XPCOMUtils.defineLazyServiceGetter(Svc, "Form",
 -                                   "@mozilla.org/satchel/form-history;1",
 -                                   "nsIFormHistory2");
--
--function querySpinningly(query, names) {
++// This test is a buit hacky - it was originally written to use the
++// formhistory.sqlite database using the nsIFormHistory2 sync APIs. However,
++// that's now been deprecated in favour of the async FormHistory.jsm.
++// Rather than re-write the test completely, we cheat - we use FormHistory.jsm
++// to initialize the database, then we just re-open it for these tests.
++
++// Init the forms database.
++FormHistory.schemaVersion;
++
++// and open the database it just created.
++let dbFile = Services.dirsvc.get("ProfD", Ci.nsIFile).clone();
++dbFile.append("formhistory.sqlite");
++let dbConnection = Services.storage.openUnsharedDatabase(dbFile);
+ 
+ function querySpinningly(query, names) {
 -  let q = Svc.Form.DBConnection.createStatement(query);
--  let r = Async.querySpinningly(q, names);
--  q.finalize();
--  return r;
--}
--
--function run_test() {
--  initTestLogging("Trace");
--
--  _("Make sure the call is async and allows other events to process");
--  let isAsync = false;
--  CommonUtils.nextTick(function() { isAsync = true; });
--  do_check_false(isAsync);
--
--  _("Empty out the formhistory table");
--  let r0 = querySpinningly("DELETE FROM moz_formhistory");
--  do_check_eq(r0, null);
--
--  _("Make sure there's nothing there");
--  let r1 = querySpinningly("SELECT 1 FROM moz_formhistory");
--  do_check_eq(r1, null);
--
--  _("Insert a row");
--  let r2 = querySpinningly("INSERT INTO moz_formhistory (fieldname, value) VALUES ('foo', 'bar')");
--  do_check_eq(r2, null);
--
--  _("Request a known value for the one row");
--  let r3 = querySpinningly("SELECT 42 num FROM moz_formhistory", ["num"]);
--  do_check_eq(r3.length, 1);
--  do_check_eq(r3[0].num, 42);
--
--  _("Get multiple columns");
--  let r4 = querySpinningly("SELECT fieldname, value FROM moz_formhistory", ["fieldname", "value"]);
--  do_check_eq(r4.length, 1);
--  do_check_eq(r4[0].fieldname, "foo");
--  do_check_eq(r4[0].value, "bar");
--
--  _("Get multiple columns with a different order");
--  let r5 = querySpinningly("SELECT fieldname, value FROM moz_formhistory", ["value", "fieldname"]);
--  do_check_eq(r5.length, 1);
--  do_check_eq(r5[0].fieldname, "foo");
--  do_check_eq(r5[0].value, "bar");
--
--  _("Add multiple entries (sqlite doesn't support multiple VALUES)");
--  let r6 = querySpinningly("INSERT INTO moz_formhistory (fieldname, value) SELECT 'foo', 'baz' UNION SELECT 'more', 'values'");
--  do_check_eq(r6, null);
--
--  _("Get multiple rows");
--  let r7 = querySpinningly("SELECT fieldname, value FROM moz_formhistory WHERE fieldname = 'foo'", ["fieldname", "value"]);
--  do_check_eq(r7.length, 2);
--  do_check_eq(r7[0].fieldname, "foo");
--  do_check_eq(r7[1].fieldname, "foo");
--
--  _("Make sure updates work");
--  let r8 = querySpinningly("UPDATE moz_formhistory SET value = 'updated' WHERE fieldname = 'more'");
--  do_check_eq(r8, null);
--
--  _("Get the updated");
--  let r9 = querySpinningly("SELECT value, fieldname FROM moz_formhistory WHERE fieldname = 'more'", ["fieldname", "value"]);
--  do_check_eq(r9.length, 1);
--  do_check_eq(r9[0].fieldname, "more");
--  do_check_eq(r9[0].value, "updated");
--
--  _("Grabbing fewer fields than queried is fine");
--  let r10 = querySpinningly("SELECT value, fieldname FROM moz_formhistory", ["fieldname"]);
--  do_check_eq(r10.length, 3);
--
--  _("Generate an execution error");
--  let query = "INSERT INTO moz_formhistory (fieldname, value) VALUES ('one', NULL)";
++  let q = dbConnection.createStatement(query);
+   let r = Async.querySpinningly(q, names);
+   q.finalize();
+   return r;
+@@ -84,7 +95,7 @@ function run_test() {
+ 
+   _("Generate an execution error");
+   let query = "INSERT INTO moz_formhistory (fieldname, value) VALUES ('one', NULL)";
 -  let stmt = Svc.Form.DBConnection.createStatement(query);
--  let except;
--  try {
--    Async.querySpinningly(stmt);
--  } catch (e) {
--    except = e;
--  }
--  stmt.finalize()
--  do_check_true(!!except);
--  do_check_eq(except.result, SQLITE_CONSTRAINT_VIOLATION);
--
--  _("Cleaning up");
--  querySpinningly("DELETE FROM moz_formhistory");
--
--  _("Make sure the timeout got to run before this function ends");
--  do_check_true(isAsync);
--}
++  let stmt = dbConnection.createStatement(query);
+   let except;
+   try {
+     Async.querySpinningly(stmt);
 diff --git a/services/common/tests/unit/xpcshell.ini b/services/common/tests/unit/xpcshell.ini
 --- a/services/common/tests/unit/xpcshell.ini
 +++ b/services/common/tests/unit/xpcshell.ini
@@ -1122,3 +1107,11 @@ deleted file mode 100644
 -   */
 -  readonly attribute mozIStorageConnection DBConnection;
 -};
+diff --git a/toolkit/components/satchel/satchel.manifest b/toolkit/components/satchel/satchel.manifest
+--- a/toolkit/components/satchel/satchel.manifest
++++ b/toolkit/components/satchel/satchel.manifest
+@@ -1,4 +1,3 @@
+-component {0c1bb408-71a2-403f-854a-3a0659829ded} nsFormHistory.js
+ contract @mozilla.org/satchel/form-history;1 {0c1bb408-71a2-403f-854a-3a0659829ded}
+ component {c11c21b2-71c9-4f87-a0f8-5e13f50495fd} nsFormAutoComplete.js
+ contract @mozilla.org/satchel/form-autocomplete;1 {c11c21b2-71c9-4f87-a0f8-5e13f50495fd}
