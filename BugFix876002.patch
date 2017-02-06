@@ -1,15 +1,15 @@
 # HG changeset patch
 # User Aman Dwivedi <dwivedi.aman96@gmail.com>
-# Date 1486277389 -19800
-#      Sun Feb 05 12:19:49 2017 +0530
-# Node ID b2a5529b32ee040e97185307142b0f9d15190780
-# Parent  1e0e193b0812f68a12fbd69198552af62347af1e
-Bug 876002 - (killSyncFormHistory) Breakdown: Remove nsIFormHistory2 so no synchronous form history code remains, r=markh
+# Date 1486382871 -19800
+#      Mon Feb 06 17:37:51 2017 +0530
+# Node ID 7c4319337b0c7a1330dd7ea4789f7ed98814ca13
+# Parent  3e555770a90a41e04bbb4ac41b65fa2f1db6977d
+Bug 876002 - (killSyncFormHistory) Breakdown: Remove nsIFormHistory2 so no synchronous form history code remains, r=markh.
 
 diff --git a/b2g/installer/package-manifest.in b/b2g/installer/package-manifest.in
 --- a/b2g/installer/package-manifest.in
 +++ b/b2g/installer/package-manifest.in
-@@ -491,7 +491,6 @@
+@@ -492,7 +492,6 @@
  @RESPATH@/components/nsWebHandlerApp.js
  @RESPATH@/components/satchel.manifest
  @RESPATH@/components/nsFormAutoComplete.js
@@ -20,7 +20,7 @@ diff --git a/b2g/installer/package-manifest.in b/b2g/installer/package-manifest.
 diff --git a/browser/installer/package-manifest.in b/browser/installer/package-manifest.in
 --- a/browser/installer/package-manifest.in
 +++ b/browser/installer/package-manifest.in
-@@ -464,7 +464,6 @@
+@@ -465,7 +465,6 @@
  @RESPATH@/components/nsWebHandlerApp.js
  @RESPATH@/components/satchel.manifest
  @RESPATH@/components/nsFormAutoComplete.js
@@ -42,7 +42,7 @@ diff --git a/mobile/android/base/java/org/mozilla/gecko/db/FormHistoryProvider.j
 diff --git a/mobile/android/installer/package-manifest.in b/mobile/android/installer/package-manifest.in
 --- a/mobile/android/installer/package-manifest.in
 +++ b/mobile/android/installer/package-manifest.in
-@@ -335,7 +335,6 @@
+@@ -336,7 +336,6 @@
  @BINPATH@/components/nsWebHandlerApp.js
  @BINPATH@/components/satchel.manifest
  @BINPATH@/components/nsFormAutoComplete.js
@@ -70,7 +70,7 @@ diff --git a/services/common/tests/unit/test_async_querySpinningly.js b/services
 -XPCOMUtils.defineLazyServiceGetter(Svc, "Form",
 -                                   "@mozilla.org/satchel/form-history;1",
 -                                   "nsIFormHistory2");
-+// This test is a buit hacky - it was originally written to use the
++// This test is a bit hacky - it was originally written to use the
 +// formhistory.sqlite database using the nsIFormHistory2 sync APIs. However,
 +// that's now been deprecated in favour of the async FormHistory.jsm.
 +// Rather than re-write the test completely, we cheat - we use FormHistory.jsm
@@ -99,17 +99,6 @@ diff --git a/services/common/tests/unit/test_async_querySpinningly.js b/services
    let except;
    try {
      Async.querySpinningly(stmt);
-diff --git a/services/common/tests/unit/xpcshell.ini b/services/common/tests/unit/xpcshell.ini
---- a/services/common/tests/unit/xpcshell.ini
-+++ b/services/common/tests/unit/xpcshell.ini
-@@ -32,7 +32,6 @@ support-files =
- [test_utils_uuid.js]
- 
- [test_async_chain.js]
--[test_async_querySpinningly.js]
- 
- [test_hawkclient.js]
- skip-if = os == "android"
 diff --git a/toolkit/components/satchel/moz.build b/toolkit/components/satchel/moz.build
 --- a/toolkit/components/satchel/moz.build
 +++ b/toolkit/components/satchel/moz.build
@@ -1110,8 +1099,9 @@ deleted file mode 100644
 diff --git a/toolkit/components/satchel/satchel.manifest b/toolkit/components/satchel/satchel.manifest
 --- a/toolkit/components/satchel/satchel.manifest
 +++ b/toolkit/components/satchel/satchel.manifest
-@@ -1,4 +1,3 @@
+@@ -1,5 +1,3 @@
 -component {0c1bb408-71a2-403f-854a-3a0659829ded} nsFormHistory.js
- contract @mozilla.org/satchel/form-history;1 {0c1bb408-71a2-403f-854a-3a0659829ded}
+-contract @mozilla.org/satchel/form-history;1 {0c1bb408-71a2-403f-854a-3a0659829ded}
  component {c11c21b2-71c9-4f87-a0f8-5e13f50495fd} nsFormAutoComplete.js
  contract @mozilla.org/satchel/form-autocomplete;1 {c11c21b2-71c9-4f87-a0f8-5e13f50495fd}
+ component {bf1e01d0-953e-11df-981c-0800200c9a66} nsInputListAutoComplete.js
