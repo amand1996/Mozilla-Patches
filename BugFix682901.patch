@@ -1,9 +1,9 @@
 # HG changeset patch
 # User Aman Dwivedi <dwivedi.aman96@gmail.com>
-# Date 1485499704 -19800
-#      Fri Jan 27 12:18:24 2017 +0530
-# Node ID f1b257e0b43f6f977cc9ce927cac200e38fdfb1d
-# Parent  1e0e193b0812f68a12fbd69198552af62347af1e
+# Date 1487003105 -19800
+#      Mon Feb 13 21:55:05 2017 +0530
+# Node ID 6155a13a5ec0aa02f465216474dffaef6f0bbf84
+# Parent  09ef6a4f41186ea6951830d1506f741005dcc46f
 Bug 682901 - catch the case where .finish() gets called before waitForExplicitFinish(), r=jdm.
 
 diff --git a/testing/mochitest/tests/Harness_sanity/mochitest.ini b/testing/mochitest/tests/Harness_sanity/mochitest.ini
@@ -19,7 +19,7 @@ diff --git a/testing/mochitest/tests/Harness_sanity/test_finish_called_before_wa
 new file mode 100644
 --- /dev/null
 +++ b/testing/mochitest/tests/Harness_sanity/test_finish_called_before_waitForExplicitFinish.html
-@@ -0,0 +1,26 @@
+@@ -0,0 +1,27 @@
 +<!DOCTYPE HTML>
 +<html>
 +<!--
@@ -42,6 +42,7 @@ new file mode 100644
 +/** Test for Bug 682901 **/
 +SimpleTest.expectExplicitFinish();
 +SimpleTest.finish();
++SimpleTest.waitForExplicitFinish();
 +</script>
 +</pre>
 +</body>
