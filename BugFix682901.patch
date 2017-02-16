@@ -1,11 +1,2031 @@
 # HG changeset patch
 # User Aman Dwivedi <dwivedi.aman96@gmail.com>
-# Date 1487003105 -19800
-#      Mon Feb 13 21:55:05 2017 +0530
-# Node ID 6155a13a5ec0aa02f465216474dffaef6f0bbf84
-# Parent  09ef6a4f41186ea6951830d1506f741005dcc46f
-Bug 682901 - catch the case where .finish() gets called before waitForExplicitFinish(), r=jdm.
+# Date 1487220400 -19800
+#      Thu Feb 16 10:16:40 2017 +0530
+# Node ID 94791f3fa749a17c48b745b7fef1afeb261d386f
+# Parent  e1a4314f8e6eae8bbc06394c14132a9c5011371b
+Bug 682901 - catch the case where .finish() gets called before waitForExplicitFinish(), r=jdm
 
+diff --git a/accessible/tests/mochitest/treeupdate/test_bug883708.xhtml b/accessible/tests/mochitest/treeupdate/test_bug883708.xhtml
+--- a/accessible/tests/mochitest/treeupdate/test_bug883708.xhtml
++++ b/accessible/tests/mochitest/treeupdate/test_bug883708.xhtml
+@@ -4,7 +4,7 @@
+           src="chrome://mochikit/content/tests/SimpleTest/SimpleTest.js"></script>
+ 
+ <script>
+-
++SimpleTest.waitForExplicitFinish();
+ function boom()
+ {
+   var newSpan = document.createElementNS("http://www.w3.org/1999/xhtml", "span");
+diff --git a/accessible/tests/mochitest/treeupdate/test_bug884251.xhtml b/accessible/tests/mochitest/treeupdate/test_bug884251.xhtml
+--- a/accessible/tests/mochitest/treeupdate/test_bug884251.xhtml
++++ b/accessible/tests/mochitest/treeupdate/test_bug884251.xhtml
+@@ -4,7 +4,7 @@
+           src="chrome://mochikit/content/tests/SimpleTest/SimpleTest.js"></script>
+ 
+ <script>
+-
++SimpleTest.waitForExplicitFinish();
+ function boom()
+ {
+   document.getElementById("k").removeAttribute("href");
+diff --git a/devtools/client/shared/components/reps/test/mochitest/test_reps_array.html b/devtools/client/shared/components/reps/test/mochitest/test_reps_array.html
+--- a/devtools/client/shared/components/reps/test/mochitest/test_reps_array.html
++++ b/devtools/client/shared/components/reps/test/mochitest/test_reps_array.html
+@@ -17,6 +17,7 @@ Test ArrayRep rep
+ <script src="head.js" type="application/javascript;version=1.8"></script>
+ <script type="application/javascript;version=1.8">
+ "use strict";
++SimpleTest.waitForExplicitFinish();
+ /* import-globals-from head.js */
+ 
+ window.onload = Task.async(function* () {
+diff --git a/devtools/client/shared/components/reps/test/mochitest/test_reps_attribute.html b/devtools/client/shared/components/reps/test/mochitest/test_reps_attribute.html
+--- a/devtools/client/shared/components/reps/test/mochitest/test_reps_attribute.html
++++ b/devtools/client/shared/components/reps/test/mochitest/test_reps_attribute.html
+@@ -16,6 +16,7 @@ Test Attribute rep
+ <pre id="test">
+ <script src="head.js" type="application/javascript;version=1.8"></script>
+ <script type="application/javascript;version=1.8">
++SimpleTest.waitForExplicitFinish();
+ window.onload = Task.async(function* () {
+   try {
+     const { REPS } = browserRequire("devtools/client/shared/components/reps/load-reps");
+diff --git a/devtools/client/shared/components/reps/test/mochitest/test_reps_comment-node.html b/devtools/client/shared/components/reps/test/mochitest/test_reps_comment-node.html
+--- a/devtools/client/shared/components/reps/test/mochitest/test_reps_comment-node.html
++++ b/devtools/client/shared/components/reps/test/mochitest/test_reps_comment-node.html
+@@ -17,7 +17,7 @@ Test comment-node rep
+ <script src="head.js" type="application/javascript;version=1.8"></script>
+ <script type="application/javascript;version=1.8">
+ "use strict";
+-
++SimpleTest.waitForExplicitFinish();
+ window.onload = Task.async(function* () {
+   try {
+     const { REPS, MODE } = browserRequire("devtools/client/shared/components/reps/load-reps");
+diff --git a/devtools/client/shared/components/reps/test/mochitest/test_reps_date-time.html b/devtools/client/shared/components/reps/test/mochitest/test_reps_date-time.html
+--- a/devtools/client/shared/components/reps/test/mochitest/test_reps_date-time.html
++++ b/devtools/client/shared/components/reps/test/mochitest/test_reps_date-time.html
+@@ -16,6 +16,7 @@ Test DateTime rep
+ <pre id="test">
+ <script src="head.js" type="application/javascript;version=1.8"></script>
+ <script type="application/javascript;version=1.8">
++SimpleTest.waitForExplicitFinish();
+ window.onload = Task.async(function* () {
+   const { REPS } = browserRequire("devtools/client/shared/components/reps/load-reps");
+   let { Rep, DateTime } = REPS;
+diff --git a/devtools/client/shared/components/reps/test/mochitest/test_reps_document.html b/devtools/client/shared/components/reps/test/mochitest/test_reps_document.html
+--- a/devtools/client/shared/components/reps/test/mochitest/test_reps_document.html
++++ b/devtools/client/shared/components/reps/test/mochitest/test_reps_document.html
+@@ -16,6 +16,7 @@ Test Document rep
+ <pre id="test">
+ <script src="head.js" type="application/javascript;version=1.8"></script>
+ <script type="application/javascript;version=1.8">
++SimpleTest.waitForExplicitFinish();
+ window.onload = Task.async(function* () {
+   const { REPS } = browserRequire("devtools/client/shared/components/reps/load-reps");
+   let { Rep, Document } = REPS;
+diff --git a/devtools/client/shared/components/reps/test/mochitest/test_reps_element-node.html b/devtools/client/shared/components/reps/test/mochitest/test_reps_element-node.html
+--- a/devtools/client/shared/components/reps/test/mochitest/test_reps_element-node.html
++++ b/devtools/client/shared/components/reps/test/mochitest/test_reps_element-node.html
+@@ -17,7 +17,7 @@ Test Element node rep
+ <script src="head.js" type="application/javascript;version=1.8"></script>
+ <script type="application/javascript;version=1.8">
+ "use strict";
+-
++SimpleTest.waitForExplicitFinish();
+ window.onload = Task.async(function* () {
+   const { REPS, MODE } = browserRequire("devtools/client/shared/components/reps/load-reps");
+   let { Rep, ElementNode } = REPS;
+diff --git a/devtools/client/shared/components/reps/test/mochitest/test_reps_error.html b/devtools/client/shared/components/reps/test/mochitest/test_reps_error.html
+--- a/devtools/client/shared/components/reps/test/mochitest/test_reps_error.html
++++ b/devtools/client/shared/components/reps/test/mochitest/test_reps_error.html
+@@ -17,7 +17,7 @@ Test Error rep
+ <script src="head.js" type="application/javascript;version=1.8"></script>
+ <script type="application/javascript;version=1.8">
+ "use strict";
+-
++SimpleTest.waitForExplicitFinish();
+ window.onload = Task.async(function* () {
+   const { REPS, MODE } = browserRequire("devtools/client/shared/components/reps/load-reps");
+   let { Rep, ErrorRep } = REPS;
+diff --git a/devtools/client/shared/components/reps/test/mochitest/test_reps_event.html b/devtools/client/shared/components/reps/test/mochitest/test_reps_event.html
+--- a/devtools/client/shared/components/reps/test/mochitest/test_reps_event.html
++++ b/devtools/client/shared/components/reps/test/mochitest/test_reps_event.html
+@@ -16,6 +16,7 @@ Test Event rep
+ <pre id="test">
+ <script src="head.js" type="application/javascript;version=1.8"></script>
+ <script type="application/javascript;version=1.8">
++SimpleTest.waitForExplicitFinish();
+ window.onload = Task.async(function* () {
+   const { REPS, MODE } = browserRequire("devtools/client/shared/components/reps/load-reps");
+   let { Rep, Event } = REPS;
+diff --git a/devtools/client/shared/components/reps/test/mochitest/test_reps_failure.html b/devtools/client/shared/components/reps/test/mochitest/test_reps_failure.html
+--- a/devtools/client/shared/components/reps/test/mochitest/test_reps_failure.html
++++ b/devtools/client/shared/components/reps/test/mochitest/test_reps_failure.html
+@@ -16,6 +16,7 @@ Test fallback for rep rendering when a r
+ <pre id="test">
+ <script src="head.js" type="application/javascript;version=1.8"></script>
+ <script type="application/javascript;version=1.8">
++SimpleTest.waitForExplicitFinish();
+ window.onload = Task.async(function* () {
+   try {
+     const { REPS } = browserRequire("devtools/client/shared/components/reps/load-reps");
+diff --git a/devtools/client/shared/components/reps/test/mochitest/test_reps_function.html b/devtools/client/shared/components/reps/test/mochitest/test_reps_function.html
+--- a/devtools/client/shared/components/reps/test/mochitest/test_reps_function.html
++++ b/devtools/client/shared/components/reps/test/mochitest/test_reps_function.html
+@@ -16,6 +16,7 @@ Test Func rep
+ <pre id="test">
+ <script src="head.js" type="application/javascript;version=1.8"></script>
+ <script type="application/javascript;version=1.8">
++SimpleTest.waitForExplicitFinish();
+ window.onload = Task.async(function* () {
+   const { REPS, MODE } = browserRequire("devtools/client/shared/components/reps/load-reps");
+   let { Rep, Func } = REPS;
+diff --git a/devtools/client/shared/components/reps/test/mochitest/test_reps_grip-array.html b/devtools/client/shared/components/reps/test/mochitest/test_reps_grip-array.html
+--- a/devtools/client/shared/components/reps/test/mochitest/test_reps_grip-array.html
++++ b/devtools/client/shared/components/reps/test/mochitest/test_reps_grip-array.html
+@@ -16,6 +16,7 @@ Test GripArray rep
+ <pre id="test">
+ <script src="head.js" type="application/javascript;version=1.8"></script>
+ <script type="application/javascript;version=1.8">
++SimpleTest.waitForExplicitFinish();
+ window.onload = Task.async(function* () {
+   const { REPS, MODE } = browserRequire("devtools/client/shared/components/reps/load-reps");
+   let { Rep, GripArray } = REPS;
+diff --git a/devtools/client/shared/components/reps/test/mochitest/test_reps_grip-map.html b/devtools/client/shared/components/reps/test/mochitest/test_reps_grip-map.html
+--- a/devtools/client/shared/components/reps/test/mochitest/test_reps_grip-map.html
++++ b/devtools/client/shared/components/reps/test/mochitest/test_reps_grip-map.html
+@@ -17,7 +17,7 @@ Test GripMap rep
+ <script src="head.js" type="application/javascript;version=1.8"></script>
+ <script type="application/javascript;version=1.8">
+ "use strict";
+-
++SimpleTest.waitForExplicitFinish();
+ window.onload = Task.async(function* () {
+   const { REPS, MODE } = browserRequire("devtools/client/shared/components/reps/load-reps");
+   let { Rep, GripMap } = REPS;
+diff --git a/devtools/client/shared/components/reps/test/mochitest/test_reps_grip.html b/devtools/client/shared/components/reps/test/mochitest/test_reps_grip.html
+--- a/devtools/client/shared/components/reps/test/mochitest/test_reps_grip.html
++++ b/devtools/client/shared/components/reps/test/mochitest/test_reps_grip.html
+@@ -16,6 +16,7 @@ Test grip rep
+ <pre id="test">
+ <script src="head.js" type="application/javascript;version=1.8"></script>
+ <script type="application/javascript;version=1.8">
++SimpleTest.waitForExplicitFinish();
+ window.onload = Task.async(function* () {
+   const { REPS, MODE } = browserRequire("devtools/client/shared/components/reps/load-reps");
+   let { Rep, Grip } = REPS;
+diff --git a/devtools/client/shared/components/reps/test/mochitest/test_reps_infinity.html b/devtools/client/shared/components/reps/test/mochitest/test_reps_infinity.html
+--- a/devtools/client/shared/components/reps/test/mochitest/test_reps_infinity.html
++++ b/devtools/client/shared/components/reps/test/mochitest/test_reps_infinity.html
+@@ -17,7 +17,7 @@ Test Infinity rep
+ <script src="head.js" type="application/javascript;version=1.8"></script>
+ <script type="application/javascript;version=1.8">
+ "use strict";
+-
++SimpleTest.waitForExplicitFinish();
+ window.onload = Task.async(function* () {
+   const { REPS } = browserRequire("devtools/client/shared/components/reps/load-reps");
+   let { Rep, InfinityRep } = REPS;
+diff --git a/devtools/client/shared/components/reps/test/mochitest/test_reps_long-string.html b/devtools/client/shared/components/reps/test/mochitest/test_reps_long-string.html
+--- a/devtools/client/shared/components/reps/test/mochitest/test_reps_long-string.html
++++ b/devtools/client/shared/components/reps/test/mochitest/test_reps_long-string.html
+@@ -16,6 +16,7 @@ Test LongString rep
+ <pre id="test">
+ <script src="head.js" type="application/javascript;version=1.8"></script>
+ <script type="application/javascript;version=1.8">
++SimpleTest.waitForExplicitFinish();
+ window.onload = Task.async(function* () {
+   const { REPS } = browserRequire("devtools/client/shared/components/reps/load-reps");
+   let { Rep, LongStringRep } = REPS;
+diff --git a/devtools/client/shared/components/reps/test/mochitest/test_reps_nan.html b/devtools/client/shared/components/reps/test/mochitest/test_reps_nan.html
+--- a/devtools/client/shared/components/reps/test/mochitest/test_reps_nan.html
++++ b/devtools/client/shared/components/reps/test/mochitest/test_reps_nan.html
+@@ -17,7 +17,7 @@ Test NaN rep
+ <script src="head.js" type="application/javascript;version=1.8"></script>
+ <script type="application/javascript;version=1.8">
+ "use strict";
+-
++SimpleTest.waitForExplicitFinish();
+ window.onload = Task.async(function* () {
+   const { REPS } = browserRequire("devtools/client/shared/components/reps/load-reps");
+   let { Rep, NaNRep } = REPS;
+diff --git a/devtools/client/shared/components/reps/test/mochitest/test_reps_null.html b/devtools/client/shared/components/reps/test/mochitest/test_reps_null.html
+--- a/devtools/client/shared/components/reps/test/mochitest/test_reps_null.html
++++ b/devtools/client/shared/components/reps/test/mochitest/test_reps_null.html
+@@ -16,6 +16,7 @@ Test Null rep
+ <pre id="test">
+ <script src="head.js" type="application/javascript;version=1.8"></script>
+ <script type="application/javascript;version=1.8">
++SimpleTest.waitForExplicitFinish();
+ window.onload = Task.async(function* () {
+   try {
+     const { REPS } = browserRequire("devtools/client/shared/components/reps/load-reps");
+diff --git a/devtools/client/shared/components/reps/test/mochitest/test_reps_number.html b/devtools/client/shared/components/reps/test/mochitest/test_reps_number.html
+--- a/devtools/client/shared/components/reps/test/mochitest/test_reps_number.html
++++ b/devtools/client/shared/components/reps/test/mochitest/test_reps_number.html
+@@ -16,6 +16,7 @@ Test Number rep
+ <pre id="test">
+ <script src="head.js" type="application/javascript;version=1.8"></script>
+ <script type="application/javascript;version=1.8">
++SimpleTest.waitForExplicitFinish();
+ window.onload = Task.async(function* () {
+   const { REPS } = browserRequire("devtools/client/shared/components/reps/load-reps");
+   let { Rep, Number } = REPS;
+diff --git a/devtools/client/shared/components/reps/test/mochitest/test_reps_object-with-text.html b/devtools/client/shared/components/reps/test/mochitest/test_reps_object-with-text.html
+--- a/devtools/client/shared/components/reps/test/mochitest/test_reps_object-with-text.html
++++ b/devtools/client/shared/components/reps/test/mochitest/test_reps_object-with-text.html
+@@ -16,6 +16,7 @@ Test ObjectWithText rep
+ <pre id="test">
+ <script src="head.js" type="application/javascript;version=1.8"></script>
+ <script type="application/javascript;version=1.8">
++SimpleTest.waitForExplicitFinish();
+ window.onload = Task.async(function* () {
+   try {
+     const { REPS } = browserRequire("devtools/client/shared/components/reps/load-reps");
+diff --git a/devtools/client/shared/components/reps/test/mochitest/test_reps_object-with-url.html b/devtools/client/shared/components/reps/test/mochitest/test_reps_object-with-url.html
+--- a/devtools/client/shared/components/reps/test/mochitest/test_reps_object-with-url.html
++++ b/devtools/client/shared/components/reps/test/mochitest/test_reps_object-with-url.html
+@@ -16,6 +16,7 @@ Test ObjectWithURL rep
+ <pre id="test">
+ <script src="head.js" type="application/javascript;version=1.8"></script>
+ <script type="application/javascript;version=1.8">
++SimpleTest.waitForExplicitFinish();
+ window.onload = Task.async(function* () {
+   try {
+     let ReactDOM = browserRequire("devtools/client/shared/vendor/react-dom");
+diff --git a/devtools/client/shared/components/reps/test/mochitest/test_reps_object.html b/devtools/client/shared/components/reps/test/mochitest/test_reps_object.html
+--- a/devtools/client/shared/components/reps/test/mochitest/test_reps_object.html
++++ b/devtools/client/shared/components/reps/test/mochitest/test_reps_object.html
+@@ -16,6 +16,7 @@ Test Obj rep
+ <pre id="test">
+ <script src="head.js" type="application/javascript;version=1.8"></script>
+ <script type="application/javascript;version=1.8">
++SimpleTest.waitForExplicitFinish();
+ window.onload = Task.async(function* () {
+   const { REPS, MODE } = browserRequire("devtools/client/shared/components/reps/load-reps");
+   let { Rep, Obj } = REPS;
+diff --git a/devtools/client/shared/components/reps/test/mochitest/test_reps_promise.html b/devtools/client/shared/components/reps/test/mochitest/test_reps_promise.html
+--- a/devtools/client/shared/components/reps/test/mochitest/test_reps_promise.html
++++ b/devtools/client/shared/components/reps/test/mochitest/test_reps_promise.html
+@@ -17,7 +17,7 @@ Test Promise rep
+ <script src="head.js" type="application/javascript;version=1.8"></script>
+ <script type="application/javascript;version=1.8">
+ "use strict";
+-
++SimpleTest.waitForExplicitFinish();
+ window.onload = Task.async(function* () {
+   const { REPS, MODE } = browserRequire("devtools/client/shared/components/reps/load-reps");
+   let { Rep, PromiseRep } = REPS;
+diff --git a/devtools/client/shared/components/reps/test/mochitest/test_reps_regexp.html b/devtools/client/shared/components/reps/test/mochitest/test_reps_regexp.html
+--- a/devtools/client/shared/components/reps/test/mochitest/test_reps_regexp.html
++++ b/devtools/client/shared/components/reps/test/mochitest/test_reps_regexp.html
+@@ -16,6 +16,7 @@ Test RegExp rep
+ <pre id="test">
+ <script src="head.js" type="application/javascript;version=1.8"></script>
+ <script type="application/javascript;version=1.8">
++SimpleTest.waitForExplicitFinish();
+ window.onload = Task.async(function* () {
+   try {
+     const { REPS } = browserRequire("devtools/client/shared/components/reps/load-reps");
+diff --git a/devtools/client/shared/components/reps/test/mochitest/test_reps_string.html b/devtools/client/shared/components/reps/test/mochitest/test_reps_string.html
+--- a/devtools/client/shared/components/reps/test/mochitest/test_reps_string.html
++++ b/devtools/client/shared/components/reps/test/mochitest/test_reps_string.html
+@@ -16,6 +16,7 @@ Test String rep
+ <pre id="test">
+ <script src="head.js" type="application/javascript;version=1.8"></script>
+ <script type="application/javascript;version=1.8">
++SimpleTest.waitForExplicitFinish();
+ window.onload = Task.async(function* () {
+   const { REPS } = browserRequire("devtools/client/shared/components/reps/load-reps");
+   let { Rep, StringRep } = REPS;
+diff --git a/devtools/client/shared/components/reps/test/mochitest/test_reps_stylesheet.html b/devtools/client/shared/components/reps/test/mochitest/test_reps_stylesheet.html
+--- a/devtools/client/shared/components/reps/test/mochitest/test_reps_stylesheet.html
++++ b/devtools/client/shared/components/reps/test/mochitest/test_reps_stylesheet.html
+@@ -16,6 +16,7 @@ Test Stylesheet rep
+ <pre id="test">
+ <script src="head.js" type="application/javascript;version=1.8"></script>
+ <script type="application/javascript;version=1.8">
++SimpleTest.waitForExplicitFinish();
+ window.onload = Task.async(function* () {
+   try {
+     const { REPS } = browserRequire("devtools/client/shared/components/reps/load-reps");
+diff --git a/devtools/client/shared/components/reps/test/mochitest/test_reps_symbol.html b/devtools/client/shared/components/reps/test/mochitest/test_reps_symbol.html
+--- a/devtools/client/shared/components/reps/test/mochitest/test_reps_symbol.html
++++ b/devtools/client/shared/components/reps/test/mochitest/test_reps_symbol.html
+@@ -17,6 +17,7 @@ Test Symbol rep
+ <script src="head.js" type="application/javascript;version=1.8"></script>
+ <script type="application/javascript;version=1.8">
+ "use strict";
++SimpleTest.waitForExplicitFinish();
+ /* import-globals-from head.js */
+ 
+ window.onload = Task.async(function* () {
+diff --git a/devtools/client/shared/components/reps/test/mochitest/test_reps_text-node.html b/devtools/client/shared/components/reps/test/mochitest/test_reps_text-node.html
+--- a/devtools/client/shared/components/reps/test/mochitest/test_reps_text-node.html
++++ b/devtools/client/shared/components/reps/test/mochitest/test_reps_text-node.html
+@@ -17,7 +17,7 @@ Test text-node rep
+ <script src="head.js" type="application/javascript;version=1.8"></script>
+ <script type="application/javascript;version=1.8">
+ "use strict";
+-
++SimpleTest.waitForExplicitFinish();
+ window.onload = Task.async(function* () {
+   const { REPS, MODE } = browserRequire("devtools/client/shared/components/reps/load-reps");
+   let { Rep, TextNode } = REPS;
+diff --git a/devtools/client/shared/components/reps/test/mochitest/test_reps_undefined.html b/devtools/client/shared/components/reps/test/mochitest/test_reps_undefined.html
+--- a/devtools/client/shared/components/reps/test/mochitest/test_reps_undefined.html
++++ b/devtools/client/shared/components/reps/test/mochitest/test_reps_undefined.html
+@@ -16,6 +16,7 @@ Test undefined rep
+ <pre id="test">
+ <script src="head.js" type="application/javascript;version=1.8"></script>
+ <script type="application/javascript;version=1.8">
++SimpleTest.waitForExplicitFinish();
+ window.onload = Task.async(function* () {
+   try {
+     let ReactDOM = browserRequire("devtools/client/shared/vendor/react-dom");
+diff --git a/devtools/client/shared/components/reps/test/mochitest/test_reps_window.html b/devtools/client/shared/components/reps/test/mochitest/test_reps_window.html
+--- a/devtools/client/shared/components/reps/test/mochitest/test_reps_window.html
++++ b/devtools/client/shared/components/reps/test/mochitest/test_reps_window.html
+@@ -16,6 +16,7 @@ Test window rep
+ <pre id="test">
+ <script src="head.js" type="application/javascript;version=1.8"></script>
+ <script type="application/javascript;version=1.8">
++SimpleTest.waitForExplicitFinish();
+ window.onload = Task.async(function* () {
+   try {
+     let ReactDOM = browserRequire("devtools/client/shared/vendor/react-dom");
+diff --git a/dom/console/tests/test_bug978522.html b/dom/console/tests/test_bug978522.html
+--- a/dom/console/tests/test_bug978522.html
++++ b/dom/console/tests/test_bug978522.html
+@@ -18,7 +18,6 @@ https://bugzilla.mozilla.org/show_bug.cg
+       console.log('%s', {
+         toString: function() {
+           ok(true, "Still alive \\o/");
+-          SimpleTest.finish();
+           return "hello world";
+         }
+       });
+@@ -26,7 +25,7 @@ https://bugzilla.mozilla.org/show_bug.cg
+   });
+ 
+   SimpleTest.waitForExplicitFinish();
+-
++  SimpleTest.finish();
+ </script>
+ </body>
+ </html>
+diff --git a/dom/events/test/test_bug667919-1.html b/dom/events/test/test_bug667919-1.html
+--- a/dom/events/test/test_bug667919-1.html
++++ b/dom/events/test/test_bug667919-1.html
+@@ -24,7 +24,6 @@ window.ondeviceorientation = function(ev
+   is(event.beta, 2.25);
+   is(event.gamma, 3.667);
+   is(event.absolute, true);
+-  SimpleTest.finish();
+ };
+ 
+ var event = DeviceOrientationEvent;
+@@ -34,6 +33,7 @@ event = document.createEvent("DeviceOrie
+ event.initDeviceOrientationEvent('deviceorientation', true, true, 1.5, 2.25, 3.667, true);
+ window.dispatchEvent(event);
+ SimpleTest.waitForExplicitFinish();
++SimpleTest.finish();
+ 
+ </script>
+ </pre>
+diff --git a/dom/indexedDB/test/test_bug937006.html b/dom/indexedDB/test/test_bug937006.html
+--- a/dom/indexedDB/test/test_bug937006.html
++++ b/dom/indexedDB/test/test_bug937006.html
+@@ -21,6 +21,7 @@
+     setTimeout(indexedDB.deleteDatabase.bind(indexedDB), 0, 'x');
+     setTimeout(function() {
+       ok(true, "Still alive");
++      SimpleTest.waitForExplicitFinish();
+       SimpleTest.finish();
+     }, 10);
+   }
+diff --git a/dom/media/tests/mochitest/identity/identityPcTest.js b/dom/media/tests/mochitest/identity/identityPcTest.js
+--- a/dom/media/tests/mochitest/identity/identityPcTest.js
++++ b/dom/media/tests/mochitest/identity/identityPcTest.js
+@@ -1,4 +1,5 @@
+ function identityPcTest(remoteOptions) {
++  SimpleTest.waitForExplicitFinish();
+   var user = 'someone';
+   var domain1 = 'test1.example.com';
+   var domain2 = 'test2.example.com';
+diff --git a/dom/media/tests/mochitest/identity/test_getIdentityAssertion.html b/dom/media/tests/mochitest/identity/test_getIdentityAssertion.html
+--- a/dom/media/tests/mochitest/identity/test_getIdentityAssertion.html
++++ b/dom/media/tests/mochitest/identity/test_getIdentityAssertion.html
+@@ -28,6 +28,7 @@ function getAssertion(t, instructions, u
+ 
+ var test;
+ function theTest() {
++  SimpleTest.waitForExplicitFinish();
+   test = new PeerConnectionTest();
+   test.setMediaConstraints([{audio: true}], [{audio: true}]);
+   test.chain.removeAfter('PC_REMOTE_CHECK_INITIAL_SIGNALINGSTATE');
+diff --git a/dom/media/tests/mochitest/identity/test_loginNeeded.html b/dom/media/tests/mochitest/identity/test_loginNeeded.html
+--- a/dom/media/tests/mochitest/identity/test_loginNeeded.html
++++ b/dom/media/tests/mochitest/identity/test_loginNeeded.html
+@@ -41,6 +41,7 @@ function checkLogin(t, name, onLoginNeed
+ }
+ 
+ function theTest() {
++  SimpleTest.waitForExplicitFinish();
+   var test = new PeerConnectionTest();
+   test.setMediaConstraints([{audio: true}], [{audio: true}]);
+   test.chain.removeAfter('PC_REMOTE_CHECK_INITIAL_SIGNALINGSTATE');
+diff --git a/dom/media/tests/mochitest/identity/test_peerConnection_asymmetricIsolation.html b/dom/media/tests/mochitest/identity/test_peerConnection_asymmetricIsolation.html
+--- a/dom/media/tests/mochitest/identity/test_peerConnection_asymmetricIsolation.html
++++ b/dom/media/tests/mochitest/identity/test_peerConnection_asymmetricIsolation.html
+@@ -15,6 +15,7 @@ createHTML({
+ });
+ 
+ function theTest() {
++  SimpleTest.waitForExplicitFinish();
+   // Override the remote media capture options to remove isolation for the
+   // remote party; the test verifies that the media it receives on the local
+   // side is isolated anyway.
+diff --git a/dom/media/tests/mochitest/identity/test_setIdentityProvider.html b/dom/media/tests/mochitest/identity/test_setIdentityProvider.html
+--- a/dom/media/tests/mochitest/identity/test_setIdentityProvider.html
++++ b/dom/media/tests/mochitest/identity/test_setIdentityProvider.html
+@@ -22,6 +22,7 @@ function checkIdentity(peer, prefix, idp
+ }
+ 
+ function theTest() {
++  SimpleTest.waitForExplicitFinish();
+   var test = new PeerConnectionTest();
+   test.setMediaConstraints([{audio: true}], [{audio: true}]);
+   test.pcLocal.setIdentityProvider("test1.example.com", "idp.js", "someone");
+diff --git a/dom/media/tests/mochitest/identity/test_setIdentityProviderWithErrors.html b/dom/media/tests/mochitest/identity/test_setIdentityProviderWithErrors.html
+--- a/dom/media/tests/mochitest/identity/test_setIdentityProviderWithErrors.html
++++ b/dom/media/tests/mochitest/identity/test_setIdentityProviderWithErrors.html
+@@ -14,6 +14,7 @@
+   });
+ 
+ runNetworkTest(function () {
++  SimpleTest.waitForExplicitFinish();
+   var test = new PeerConnectionTest();
+   test.setMediaConstraints([{audio: true}], [{audio: true}]);
+   // No IdP for local.
+diff --git a/dom/media/tests/mochitest/test_dataChannel_basicAudio.html b/dom/media/tests/mochitest/test_dataChannel_basicAudio.html
+--- a/dom/media/tests/mochitest/test_dataChannel_basicAudio.html
++++ b/dom/media/tests/mochitest/test_dataChannel_basicAudio.html
+@@ -17,6 +17,7 @@
+     addInitialDataChannel(test.chain);
+     test.setMediaConstraints([{audio: true}], [{audio: true}]);
+     test.run();
++    SimpleTest.waitForExplicitFinish();
+   });
+ 
+ </script>
+diff --git a/dom/media/tests/mochitest/test_dataChannel_basicAudioVideo.html b/dom/media/tests/mochitest/test_dataChannel_basicAudioVideo.html
+--- a/dom/media/tests/mochitest/test_dataChannel_basicAudioVideo.html
++++ b/dom/media/tests/mochitest/test_dataChannel_basicAudioVideo.html
+@@ -18,6 +18,7 @@
+     test.setMediaConstraints([{audio: true}, {video: true}],
+                              [{audio: true}, {video: true}]);
+     test.run();
++    SimpleTest.waitForExplicitFinish();
+   });
+ 
+ </script>
+diff --git a/dom/media/tests/mochitest/test_dataChannel_basicAudioVideoCombined.html b/dom/media/tests/mochitest/test_dataChannel_basicAudioVideoCombined.html
+--- a/dom/media/tests/mochitest/test_dataChannel_basicAudioVideoCombined.html
++++ b/dom/media/tests/mochitest/test_dataChannel_basicAudioVideoCombined.html
+@@ -18,6 +18,7 @@
+     test.setMediaConstraints([{audio: true, video: true}],
+                              [{audio: true, video: true}]);
+     test.run();
++    SimpleTest.waitForExplicitFinish();
+   });
+ 
+ </script>
+diff --git a/dom/media/tests/mochitest/test_dataChannel_basicAudioVideoNoBundle.html b/dom/media/tests/mochitest/test_dataChannel_basicAudioVideoNoBundle.html
+--- a/dom/media/tests/mochitest/test_dataChannel_basicAudioVideoNoBundle.html
++++ b/dom/media/tests/mochitest/test_dataChannel_basicAudioVideoNoBundle.html
+@@ -20,6 +20,7 @@ runNetworkTest(function (options) {
+   test.setMediaConstraints([{audio: true}, {video: true}],
+                            [{audio: true}, {video: true}]);
+   test.run();
++  SimpleTest.waitForExplicitFinish();
+ });
+ </script>
+ </pre>
+diff --git a/dom/media/tests/mochitest/test_dataChannel_basicDataOnly.html b/dom/media/tests/mochitest/test_dataChannel_basicDataOnly.html
+--- a/dom/media/tests/mochitest/test_dataChannel_basicDataOnly.html
++++ b/dom/media/tests/mochitest/test_dataChannel_basicDataOnly.html
+@@ -16,6 +16,7 @@
+     test = new PeerConnectionTest(options);
+     addInitialDataChannel(test.chain);
+     test.run();
++    SimpleTest.waitForExplicitFinish();
+   });
+ 
+ </script>
+diff --git a/dom/media/tests/mochitest/test_dataChannel_basicVideo.html b/dom/media/tests/mochitest/test_dataChannel_basicVideo.html
+--- a/dom/media/tests/mochitest/test_dataChannel_basicVideo.html
++++ b/dom/media/tests/mochitest/test_dataChannel_basicVideo.html
+@@ -17,6 +17,8 @@
+     addInitialDataChannel(test.chain);
+     test.setMediaConstraints([{video: true}], [{video: true}]);
+     test.run();
++    SimpleTest.waitForExplicitFinish();
++    SimpleTest.finish();
+   });
+ 
+ </script>
+diff --git a/dom/media/tests/mochitest/test_dataChannel_bug1013809.html b/dom/media/tests/mochitest/test_dataChannel_bug1013809.html
+--- a/dom/media/tests/mochitest/test_dataChannel_bug1013809.html
++++ b/dom/media/tests/mochitest/test_dataChannel_bug1013809.html
+@@ -19,6 +19,8 @@
+     test.chain.insertAfter("PC_LOCAL_SET_REMOTE_DESCRIPTION", sld);
+     test.setMediaConstraints([{audio: true}], [{audio: true}]);
+     test.run();
++    SimpleTest.waitForExplicitFinish();
++    SimpleTest.finish();
+   });
+ 
+ </script>
+diff --git a/dom/media/tests/mochitest/test_dataChannel_noOffer.html b/dom/media/tests/mochitest/test_dataChannel_noOffer.html
+--- a/dom/media/tests/mochitest/test_dataChannel_noOffer.html
++++ b/dom/media/tests/mochitest/test_dataChannel_noOffer.html
+@@ -20,7 +20,7 @@
+     pc.createOffer(options).then(offer => {
+       ok(!offer.sdp.includes("m=application"),
+         "m=application is not contained in the SDP");
+-
++      SimpleTest.waitForExplicitFinish();
+       networkTestFinished();
+     })
+     .catch(generateErrorCallback());
+diff --git a/dom/media/tests/mochitest/test_enumerateDevices.html b/dom/media/tests/mochitest/test_enumerateDevices.html
+--- a/dom/media/tests/mochitest/test_enumerateDevices.html
++++ b/dom/media/tests/mochitest/test_enumerateDevices.html
+@@ -32,6 +32,7 @@ runTest(() =>
+   .then(() => navigator.mediaDevices.enumerateDevices())
+   .then(devices => {
+     ok(devices.length > 0, "At least one device found");
++    SimpleTest.waitForExplicitFinish();
+     var jsoned = JSON.parse(JSON.stringify(devices));
+     is(jsoned[0].kind, devices[0].kind, "kind survived serializer");
+     is(jsoned[0].deviceId, devices[0].deviceId, "deviceId survived serializer");
+diff --git a/dom/media/tests/mochitest/test_getUserMedia_active_autoplay.html b/dom/media/tests/mochitest/test_getUserMedia_active_autoplay.html
+--- a/dom/media/tests/mochitest/test_getUserMedia_active_autoplay.html
++++ b/dom/media/tests/mochitest/test_getUserMedia_active_autoplay.html
+@@ -20,6 +20,7 @@ createHTML({
+ });
+ 
+ runTest(() => getUserMedia({audio: true, video: true}).then(s => {
++  SimpleTest.waitForExplicitFinish();
+   stream = s;
+   otherVideoTrack = stream.getVideoTracks()[0].clone();
+   otherAudioTrack = stream.getAudioTracks()[0].clone();
+diff --git a/dom/media/tests/mochitest/test_getUserMedia_addTrackRemoveTrack.html b/dom/media/tests/mochitest/test_getUserMedia_addTrackRemoveTrack.html
+--- a/dom/media/tests/mochitest/test_getUserMedia_addTrackRemoveTrack.html
++++ b/dom/media/tests/mochitest/test_getUserMedia_addTrackRemoveTrack.html
+@@ -17,6 +17,7 @@
+     .then(() => getUserMedia({audio: true})).then(stream =>
+       getUserMedia({video: true}).then(otherStream => {
+         info("Test addTrack()ing a video track to an audio-only gUM stream");
++        SimpleTest.waitForExplicitFinish();
+         var track = stream.getTracks()[0];
+         var otherTrack = otherStream.getTracks()[0];
+ 
+diff --git a/dom/media/tests/mochitest/test_getUserMedia_addtrack_removetrack_events.html b/dom/media/tests/mochitest/test_getUserMedia_addtrack_removetrack_events.html
+--- a/dom/media/tests/mochitest/test_getUserMedia_addtrack_removetrack_events.html
++++ b/dom/media/tests/mochitest/test_getUserMedia_addtrack_removetrack_events.html
+@@ -37,6 +37,7 @@ var stopTrack = track => {
+ 
+ runTest(() => getUserMedia({audio: true, video: true})
+   .then(s => {
++    SimpleTest.waitForExplicitFinish();
+     stream = s;
+     clone = s.clone();
+     stream.addEventListener("addtrack", function onAddtrack(event) {
+diff --git a/dom/media/tests/mochitest/test_getUserMedia_audioCapture.html b/dom/media/tests/mochitest/test_getUserMedia_audioCapture.html
+--- a/dom/media/tests/mochitest/test_getUserMedia_audioCapture.html
++++ b/dom/media/tests/mochitest/test_getUserMedia_audioCapture.html
+@@ -21,6 +21,7 @@ scriptsReady
+     // Get an opus file containing a sine wave at maximum amplitude, of duration
+     // `lengthSeconds`, and of frequency `frequency`.
+     function getSineWaveFile(frequency, lengthSeconds, callback) {
++      SimpleTest.waitForExplicitFinish();
+       var chunks = [];
+       var off = new OfflineAudioContext(1, lengthSeconds * 48000, 48000);
+       var osc = off.createOscillator();
+diff --git a/dom/media/tests/mochitest/test_getUserMedia_basicAudio.html b/dom/media/tests/mochitest/test_getUserMedia_basicAudio.html
+--- a/dom/media/tests/mochitest/test_getUserMedia_basicAudio.html
++++ b/dom/media/tests/mochitest/test_getUserMedia_basicAudio.html
+@@ -12,6 +12,7 @@
+    * cycle for an audio LocalMediaStream on an audio HTMLMediaElement.
+    */
+   runTest(function () {
++    SimpleTest.waitForExplicitFinish();
+     var testAudio = createMediaElement('audio', 'testAudio');
+     var constraints = {audio: true};
+ 
+diff --git a/dom/media/tests/mochitest/test_getUserMedia_basicScreenshare.html b/dom/media/tests/mochitest/test_getUserMedia_basicScreenshare.html
+--- a/dom/media/tests/mochitest/test_getUserMedia_basicScreenshare.html
++++ b/dom/media/tests/mochitest/test_getUserMedia_basicScreenshare.html
+@@ -18,6 +18,7 @@
+    * cycle for a screenshare LocalMediaStream on a video HTMLMediaElement.
+    */
+   runTest(function () {
++    SimpleTest.waitForExplicitFinish();
+     const isWinXP = navigator.userAgent.indexOf("Windows NT 5.1") != -1;
+     if (IsMacOSX10_6orOlder() || isWinXP) {
+         ok(true, "Screensharing disabled for OSX10.6 and WinXP");
+diff --git a/dom/media/tests/mochitest/test_getUserMedia_basicTabshare.html b/dom/media/tests/mochitest/test_getUserMedia_basicTabshare.html
+--- a/dom/media/tests/mochitest/test_getUserMedia_basicTabshare.html
++++ b/dom/media/tests/mochitest/test_getUserMedia_basicTabshare.html
+@@ -17,6 +17,7 @@
+    * Additionally, exercise applyConstraints code for tabshare viewport offset.
+    */
+   runTest(function () {
++    SimpleTest.waitForExplicitFinish();
+     const isWinXP = navigator.userAgent.indexOf("Windows NT 5.1") != -1;
+     if (IsMacOSX10_6orOlder() || isWinXP) {
+         ok(true, "Screensharing disabled for OSX10.6 and WinXP");
+diff --git a/dom/media/tests/mochitest/test_getUserMedia_basicVideo.html b/dom/media/tests/mochitest/test_getUserMedia_basicVideo.html
+--- a/dom/media/tests/mochitest/test_getUserMedia_basicVideo.html
++++ b/dom/media/tests/mochitest/test_getUserMedia_basicVideo.html
+@@ -15,6 +15,7 @@
+    * cycle for an video LocalMediaStream on a video HTMLMediaElement.
+    */
+   runTest(function () {
++    SimpleTest.waitForExplicitFinish();
+     var testVideo = createMediaElement('video', 'testVideo');
+     var constraints = {video: true};
+ 
+diff --git a/dom/media/tests/mochitest/test_getUserMedia_basicVideoAudio.html b/dom/media/tests/mochitest/test_getUserMedia_basicVideoAudio.html
+--- a/dom/media/tests/mochitest/test_getUserMedia_basicVideoAudio.html
++++ b/dom/media/tests/mochitest/test_getUserMedia_basicVideoAudio.html
+@@ -15,6 +15,7 @@
+    * cycle for a video and audio LocalMediaStream on a video HTMLMediaElement.
+    */
+   runTest(function () {
++    SimpleTest.waitForExplicitFinish();
+     var testVideoAudio = createMediaElement('video', 'testVideoAudio');
+     var constraints = {video: true, audio: true};
+ 
+diff --git a/dom/media/tests/mochitest/test_getUserMedia_basicVideo_playAfterLoadedmetadata.html b/dom/media/tests/mochitest/test_getUserMedia_basicVideo_playAfterLoadedmetadata.html
+--- a/dom/media/tests/mochitest/test_getUserMedia_basicVideo_playAfterLoadedmetadata.html
++++ b/dom/media/tests/mochitest/test_getUserMedia_basicVideo_playAfterLoadedmetadata.html
+@@ -15,6 +15,7 @@
+    * HTMLMediaElement playing a gUM MediaStream.
+    */
+   runTest(() => {
++    SimpleTest.waitForExplicitFinish();
+     var testVideo = createMediaElement('video', 'testVideo');
+     var constraints = {video: true};
+ 
+diff --git a/dom/media/tests/mochitest/test_getUserMedia_basicWindowshare.html b/dom/media/tests/mochitest/test_getUserMedia_basicWindowshare.html
+--- a/dom/media/tests/mochitest/test_getUserMedia_basicWindowshare.html
++++ b/dom/media/tests/mochitest/test_getUserMedia_basicWindowshare.html
+@@ -15,6 +15,7 @@
+    * cycle for an screenshare LocalMediaStream on a video HTMLMediaElement.
+    */
+   runTest(function () {
++    SimpleTest.waitForExplicitFinish();
+     const isWinXP = navigator.userAgent.indexOf("Windows NT 5.1") != -1;
+     if (IsMacOSX10_6orOlder() || isWinXP) {
+         ok(true, "Screensharing disabled for OSX10.6 and WinXP");
+diff --git a/dom/media/tests/mochitest/test_getUserMedia_bug1223696.html b/dom/media/tests/mochitest/test_getUserMedia_bug1223696.html
+--- a/dom/media/tests/mochitest/test_getUserMedia_bug1223696.html
++++ b/dom/media/tests/mochitest/test_getUserMedia_bug1223696.html
+@@ -18,7 +18,7 @@
+   runTest(() => Promise.resolve()
+     .then(() => getUserMedia({audio:true, video: true})).then(stream => {
+       info("Test addTrack()ing a video track to an audio-only gUM stream");
+-
++      SimpleTest.waitForExplicitFinish();
+       var video = createMediaElement("video", "test_video_track");
+       video.srcObject = stream;
+       video.play();
+diff --git a/dom/media/tests/mochitest/test_getUserMedia_constraints.html b/dom/media/tests/mochitest/test_getUserMedia_constraints.html
+--- a/dom/media/tests/mochitest/test_getUserMedia_constraints.html
++++ b/dom/media/tests/mochitest/test_getUserMedia_constraints.html
+@@ -104,6 +104,7 @@ var mustFailWith = (msg, reason, constra
+ 
+ runTest(() => Promise.resolve()
+   .then(() => {
++    SimpleTest.waitForExplicitFinish();
+     // Check supported constraints first.
+     var dict = navigator.mediaDevices.getSupportedConstraints();
+     var supported = Object.keys(dict);
+diff --git a/dom/media/tests/mochitest/test_getUserMedia_getTrackById.html b/dom/media/tests/mochitest/test_getUserMedia_getTrackById.html
+--- a/dom/media/tests/mochitest/test_getUserMedia_getTrackById.html
++++ b/dom/media/tests/mochitest/test_getUserMedia_getTrackById.html
+@@ -12,6 +12,7 @@
+   });
+ 
+   runTest(() => {
++    SimpleTest.waitForExplicitFinish();
+     var constraints = {audio: true, video: true};
+     return getUserMedia(constraints).then(stream => {
+       is(stream.getTrackById(""), null,
+diff --git a/dom/media/tests/mochitest/test_getUserMedia_gumWithinGum.html b/dom/media/tests/mochitest/test_getUserMedia_gumWithinGum.html
+--- a/dom/media/tests/mochitest/test_getUserMedia_gumWithinGum.html
++++ b/dom/media/tests/mochitest/test_getUserMedia_gumWithinGum.html
+@@ -13,6 +13,7 @@
+    * the audio gum call happens within the video gum call.
+    */
+   runTest(function () {
++    SimpleTest.waitForExplicitFinish();
+     return getUserMedia({video: true})
+       .then(videoStream => {
+         var testVideo = createMediaElement('video', 'testVideo');
+diff --git a/dom/media/tests/mochitest/test_getUserMedia_loadedmetadata.html b/dom/media/tests/mochitest/test_getUserMedia_loadedmetadata.html
+--- a/dom/media/tests/mochitest/test_getUserMedia_loadedmetadata.html
++++ b/dom/media/tests/mochitest/test_getUserMedia_loadedmetadata.html
+@@ -17,6 +17,7 @@
+    * Also makes sure that the video size has been set on "loadedmetadata".
+    */
+   runTest(function () {
++    SimpleTest.waitForExplicitFinish();
+     var v = document.createElement("video");
+     document.body.appendChild(v);
+     v.preload = "metadata";
+diff --git a/dom/media/tests/mochitest/test_getUserMedia_mediaElementCapture_audio.html b/dom/media/tests/mochitest/test_getUserMedia_mediaElementCapture_audio.html
+--- a/dom/media/tests/mochitest/test_getUserMedia_mediaElementCapture_audio.html
++++ b/dom/media/tests/mochitest/test_getUserMedia_mediaElementCapture_audio.html
+@@ -19,6 +19,7 @@ var gUMAudioElement;
+ var analyser;
+ runTest(() => getUserMedia({audio: true})
+   .then(stream => {
++    SimpleTest.waitForExplicitFinish();
+     gUMAudioElement = createMediaElement("audio", "gUMAudio");
+     gUMAudioElement.srcObject = stream;
+ 
+diff --git a/dom/media/tests/mochitest/test_getUserMedia_mediaElementCapture_tracks.html b/dom/media/tests/mochitest/test_getUserMedia_mediaElementCapture_tracks.html
+--- a/dom/media/tests/mochitest/test_getUserMedia_mediaElementCapture_tracks.html
++++ b/dom/media/tests/mochitest/test_getUserMedia_mediaElementCapture_tracks.html
+@@ -23,6 +23,7 @@ var streamUntilEnded;
+ var tracks = [];
+ runTest(() => getUserMedia({audio: true, video: true})
+   .then(stream => {
++    SimpleTest.waitForExplicitFinish();
+     // We need to test with multiple tracks. We add an extra of each kind.
+     stream.getTracks().forEach(t => stream.addTrack(t.clone()));
+ 
+diff --git a/dom/media/tests/mochitest/test_getUserMedia_mediaElementCapture_video.html b/dom/media/tests/mochitest/test_getUserMedia_mediaElementCapture_video.html
+--- a/dom/media/tests/mochitest/test_getUserMedia_mediaElementCapture_video.html
++++ b/dom/media/tests/mochitest/test_getUserMedia_mediaElementCapture_video.html
+@@ -61,6 +61,7 @@ var checkVideoPaused = video => checkHas
+ 
+ runTest(() => getUserMedia({video: true, fake: true})
+   .then(stream => {
++    SimpleTest.waitForExplicitFinish();
+     gUMVideoElement =
+       createMediaElement("video", "gUMVideo");
+     gUMVideoElement.srcObject = stream;
+diff --git a/dom/media/tests/mochitest/test_getUserMedia_mediaStreamClone.html b/dom/media/tests/mochitest/test_getUserMedia_mediaStreamClone.html
+--- a/dom/media/tests/mochitest/test_getUserMedia_mediaStreamClone.html
++++ b/dom/media/tests/mochitest/test_getUserMedia_mediaStreamClone.html
+@@ -15,6 +15,7 @@
+ 
+   runTest(() => Promise.resolve()
+     .then(() => getUserMedia({audio: true, video: true})).then(stream => {
++      SimpleTest.waitForExplicitFinish();
+       info("Test clone()ing an audio/video gUM stream");
+       var clone = stream.clone();
+ 
+diff --git a/dom/media/tests/mochitest/test_getUserMedia_mediaStreamConstructors.html b/dom/media/tests/mochitest/test_getUserMedia_mediaStreamConstructors.html
+--- a/dom/media/tests/mochitest/test_getUserMedia_mediaStreamConstructors.html
++++ b/dom/media/tests/mochitest/test_getUserMedia_mediaStreamConstructors.html
+@@ -19,6 +19,7 @@
+   runTest(() => Promise.resolve()
+     .then(() => videoElement = createMediaElement('video', 'constructorsTest'))
+     .then(() => getUserMedia({video: true})).then(gUMStream => {
++      SimpleTest.waitForExplicitFinish();
+       info("Test default constructor with video");
+       ok(gUMStream.active, "gUMStream with one track should be active");
+       var track = gUMStream.getTracks()[0];
+diff --git a/dom/media/tests/mochitest/test_getUserMedia_mediaStreamTrackClone.html b/dom/media/tests/mochitest/test_getUserMedia_mediaStreamTrackClone.html
+--- a/dom/media/tests/mochitest/test_getUserMedia_mediaStreamTrackClone.html
++++ b/dom/media/tests/mochitest/test_getUserMedia_mediaStreamTrackClone.html
+@@ -38,6 +38,7 @@
+     .then(() => testSingleTrackClonePlayback({audio: true}))
+     .then(() => testSingleTrackClonePlayback({video: true}))
+     .then(() => getUserMedia({video: true})).then(stream => {
++      SimpleTest.waitForExplicitFinish();
+       info("Test cloning a track into inception");
+       var track = stream.getTracks()[0];
+       var clone = track;
+diff --git a/dom/media/tests/mochitest/test_getUserMedia_peerIdentity.html b/dom/media/tests/mochitest/test_getUserMedia_peerIdentity.html
+--- a/dom/media/tests/mochitest/test_getUserMedia_peerIdentity.html
++++ b/dom/media/tests/mochitest/test_getUserMedia_peerIdentity.html
+@@ -13,6 +13,7 @@ createHTML({
+ });
+ function theTest() {
+   function testPeerIdentityConstraint(withConstraint) {
++    SimpleTest.waitForExplicitFinish();
+     var config = { audio: true, video: true };
+     if (withConstraint) {
+       config.peerIdentity = 'user@example.com';
+diff --git a/dom/media/tests/mochitest/test_getUserMedia_playAudioTwice.html b/dom/media/tests/mochitest/test_getUserMedia_playAudioTwice.html
+--- a/dom/media/tests/mochitest/test_getUserMedia_playAudioTwice.html
++++ b/dom/media/tests/mochitest/test_getUserMedia_playAudioTwice.html
+@@ -11,6 +11,7 @@
+    * Run a test that we can complete an audio playback cycle twice in a row.
+    */
+   runTest(function () {
++    SimpleTest.waitForExplicitFinish();
+     return getUserMedia({audio: true}).then(audioStream => {
+       var testAudio = createMediaElement('audio', 'testAudio');
+       var playback = new LocalMediaStreamPlayback(testAudio, audioStream);
+diff --git a/dom/media/tests/mochitest/test_getUserMedia_playVideoAudioTwice.html b/dom/media/tests/mochitest/test_getUserMedia_playVideoAudioTwice.html
+--- a/dom/media/tests/mochitest/test_getUserMedia_playVideoAudioTwice.html
++++ b/dom/media/tests/mochitest/test_getUserMedia_playVideoAudioTwice.html
+@@ -11,6 +11,7 @@
+    * Run a test that we can complete a video playback cycle twice in a row.
+    */
+   runTest(function () {
++    SimpleTest.waitForExplicitFinish();
+     return getUserMedia({video: true, audio: true}).then(stream => {
+       var testVideo = createMediaElement('video', 'testVideo');
+       var playback = new LocalMediaStreamPlayback(testVideo, stream);
+diff --git a/dom/media/tests/mochitest/test_getUserMedia_playVideoTwice.html b/dom/media/tests/mochitest/test_getUserMedia_playVideoTwice.html
+--- a/dom/media/tests/mochitest/test_getUserMedia_playVideoTwice.html
++++ b/dom/media/tests/mochitest/test_getUserMedia_playVideoTwice.html
+@@ -11,6 +11,7 @@
+    * Run a test that we can complete a video playback cycle twice in a row.
+    */
+   runTest(function () {
++    SimpleTest.waitForExplicitFinish();
+     return getUserMedia({video: true}).then(stream => {
+       var testVideo = createMediaElement('video', 'testVideo');
+       var streamPlayback = new LocalMediaStreamPlayback(testVideo, stream);
+diff --git a/dom/media/tests/mochitest/test_getUserMedia_scarySources.html b/dom/media/tests/mochitest/test_getUserMedia_scarySources.html
+--- a/dom/media/tests/mochitest/test_getUserMedia_scarySources.html
++++ b/dom/media/tests/mochitest/test_getUserMedia_scarySources.html
+@@ -30,6 +30,7 @@ let getDevices = async constraints => {
+ };
+ 
+ runTest(async () => {
++  SimpleTest.waitForExplicitFinish();
+   const isWinXP = navigator.userAgent.indexOf("Windows NT 5.1") != -1;
+   if (IsMacOSX10_6orOlder() || isWinXP) {
+     ok(true, "Screensharing disabled for OSX10.6 and WinXP");
+diff --git a/dom/media/tests/mochitest/test_getUserMedia_spinEventLoop.html b/dom/media/tests/mochitest/test_getUserMedia_spinEventLoop.html
+--- a/dom/media/tests/mochitest/test_getUserMedia_spinEventLoop.html
++++ b/dom/media/tests/mochitest/test_getUserMedia_spinEventLoop.html
+@@ -11,6 +11,7 @@
+    * Run a test to verify that we can spin the event loop from within a mozGUM callback.
+    */
+   runTest(() => {
++    SimpleTest.waitForExplicitFinish();
+     var testAudio = createMediaElement('audio', 'testAudio');
+     return new Promise((resolve, reject) => {
+       navigator.mozGetUserMedia({ audio: true }, stream => {
+diff --git a/dom/media/tests/mochitest/test_getUserMedia_stopAudioStream.html b/dom/media/tests/mochitest/test_getUserMedia_stopAudioStream.html
+--- a/dom/media/tests/mochitest/test_getUserMedia_stopAudioStream.html
++++ b/dom/media/tests/mochitest/test_getUserMedia_stopAudioStream.html
+@@ -12,6 +12,7 @@
+    * call stop() on the stream, and successfully get an ended event fired.
+    */
+   runTest(function () {
++    SimpleTest.waitForExplicitFinish();
+     return getUserMedia({audio: true})
+       .then(stream => {
+         var testAudio = createMediaElement('audio', 'testAudio');
+diff --git a/dom/media/tests/mochitest/test_getUserMedia_stopAudioStreamWithFollowupAudio.html b/dom/media/tests/mochitest/test_getUserMedia_stopAudioStreamWithFollowupAudio.html
+--- a/dom/media/tests/mochitest/test_getUserMedia_stopAudioStreamWithFollowupAudio.html
++++ b/dom/media/tests/mochitest/test_getUserMedia_stopAudioStreamWithFollowupAudio.html
+@@ -15,6 +15,7 @@
+   runTest(function () {
+     return getUserMedia({audio: true})
+       .then(firstStream => {
++        SimpleTest.waitForExplicitFinish();
+         var testAudio = createMediaElement('audio', 'testAudio');
+         var streamPlayback = new LocalMediaStreamPlayback(testAudio, firstStream);
+ 
+diff --git a/dom/media/tests/mochitest/test_getUserMedia_stopVideoAudioStream.html b/dom/media/tests/mochitest/test_getUserMedia_stopVideoAudioStream.html
+--- a/dom/media/tests/mochitest/test_getUserMedia_stopVideoAudioStream.html
++++ b/dom/media/tests/mochitest/test_getUserMedia_stopVideoAudioStream.html
+@@ -13,6 +13,7 @@
+    * ended event fired.
+    */
+   runTest(function () {
++    SimpleTest.waitForExplicitFinish();
+     return getUserMedia({video: true, audio: true})
+       .then(stream => {
+         var testVideo = createMediaElement('video', 'testVideo');
+diff --git a/dom/media/tests/mochitest/test_getUserMedia_stopVideoAudioStreamWithFollowupVideoAudio.html b/dom/media/tests/mochitest/test_getUserMedia_stopVideoAudioStreamWithFollowupVideoAudio.html
+--- a/dom/media/tests/mochitest/test_getUserMedia_stopVideoAudioStreamWithFollowupVideoAudio.html
++++ b/dom/media/tests/mochitest/test_getUserMedia_stopVideoAudioStreamWithFollowupVideoAudio.html
+@@ -16,6 +16,7 @@
+    * playback in a media element.
+    */
+   runTest(function () {
++    SimpleTest.waitForExplicitFinish();
+     return getUserMedia({video: true, audio: true})
+       .then(stream => {
+         var testVideo = createMediaElement('video', 'testVideo');
+diff --git a/dom/media/tests/mochitest/test_getUserMedia_stopVideoStream.html b/dom/media/tests/mochitest/test_getUserMedia_stopVideoStream.html
+--- a/dom/media/tests/mochitest/test_getUserMedia_stopVideoStream.html
++++ b/dom/media/tests/mochitest/test_getUserMedia_stopVideoStream.html
+@@ -13,6 +13,7 @@
+    * ended event fired.
+    */
+   runTest(function () {
++    SimpleTest.waitForExplicitFinish();
+     return getUserMedia({video: true})
+       .then(stream => {
+         var testVideo = createMediaElement('video', 'testVideo');
+diff --git a/dom/media/tests/mochitest/test_getUserMedia_stopVideoStreamWithFollowupVideo.html b/dom/media/tests/mochitest/test_getUserMedia_stopVideoStreamWithFollowupVideo.html
+--- a/dom/media/tests/mochitest/test_getUserMedia_stopVideoStreamWithFollowupVideo.html
++++ b/dom/media/tests/mochitest/test_getUserMedia_stopVideoStreamWithFollowupVideo.html
+@@ -13,6 +13,7 @@
+    * playback in a media element.
+    */
+   runTest(function () {
++    SimpleTest.waitForExplicitFinish();
+     return getUserMedia({video: true})
+       .then(stream => {
+         var testVideo = createMediaElement('video', 'testVideo');
+diff --git a/dom/media/tests/mochitest/test_getUserMedia_trackCloneCleanup.html b/dom/media/tests/mochitest/test_getUserMedia_trackCloneCleanup.html
+--- a/dom/media/tests/mochitest/test_getUserMedia_trackCloneCleanup.html
++++ b/dom/media/tests/mochitest/test_getUserMedia_trackCloneCleanup.html
+@@ -14,6 +14,7 @@
+   });
+ 
+   runTest(() => getUserMedia({audio: true, video: true}).then(stream => {
++    SimpleTest.waitForExplicitFinish();
+     let clone = stream.clone();
+     stream.getTracks().forEach(t => t.stop());
+     stream.clone().getTracks().forEach(t => stream.addTrack(t));
+diff --git a/dom/media/tests/mochitest/test_getUserMedia_trackEnded.html b/dom/media/tests/mochitest/test_getUserMedia_trackEnded.html
+--- a/dom/media/tests/mochitest/test_getUserMedia_trackEnded.html
++++ b/dom/media/tests/mochitest/test_getUserMedia_trackEnded.html
+@@ -20,6 +20,7 @@
+   });
+ 
+   runTest(() => {
++    SimpleTest.waitForExplicitFinish();
+     let iframe = document.getElementById("iframe");
+     let stream;
+     // We're passing callbacks into a method in the iframe here, because
+diff --git a/dom/media/tests/mochitest/test_peerConnection_addAudioTrackToExistingVideoStream.html b/dom/media/tests/mochitest/test_peerConnection_addAudioTrackToExistingVideoStream.html
+--- a/dom/media/tests/mochitest/test_peerConnection_addAudioTrackToExistingVideoStream.html
++++ b/dom/media/tests/mochitest/test_peerConnection_addAudioTrackToExistingVideoStream.html
+@@ -12,6 +12,7 @@
+   });
+ 
+   runNetworkTest(function (options) {
++    SimpleTest.waitForExplicitFinish();
+     var test = new PeerConnectionTest(options);
+     test.chain.replace("PC_LOCAL_GUM",
+       [
+diff --git a/dom/media/tests/mochitest/test_peerConnection_addDataChannel.html b/dom/media/tests/mochitest/test_peerConnection_addDataChannel.html
+--- a/dom/media/tests/mochitest/test_peerConnection_addDataChannel.html
++++ b/dom/media/tests/mochitest/test_peerConnection_addDataChannel.html
+@@ -13,6 +13,7 @@
+ 
+   var test;
+   runNetworkTest(function (options) {
++    SimpleTest.waitForExplicitFinish();
+     test = new PeerConnectionTest(options);
+     addRenegotiation(test.chain,
+                      commandsCreateDataChannel,
+diff --git a/dom/media/tests/mochitest/test_peerConnection_addDataChannelNoBundle.html b/dom/media/tests/mochitest/test_peerConnection_addDataChannelNoBundle.html
+--- a/dom/media/tests/mochitest/test_peerConnection_addDataChannelNoBundle.html
++++ b/dom/media/tests/mochitest/test_peerConnection_addDataChannelNoBundle.html
+@@ -13,6 +13,7 @@
+ 
+   var test;
+   runNetworkTest(function (options) {
++    SimpleTest.waitForExplicitFinish();
+     options = options || { };
+     options.bundle = false;
+     test = new PeerConnectionTest(options);
+diff --git a/dom/media/tests/mochitest/test_peerConnection_addIceCandidate.html b/dom/media/tests/mochitest/test_peerConnection_addIceCandidate.html
+--- a/dom/media/tests/mochitest/test_peerConnection_addIceCandidate.html
++++ b/dom/media/tests/mochitest/test_peerConnection_addIceCandidate.html
+@@ -13,6 +13,7 @@
+ 
+   var test;
+   runNetworkTest(function () {
++    SimpleTest.waitForExplicitFinish();
+     test = new PeerConnectionTest();
+     test.setMediaConstraints([{audio: true}], [{audio: true}]);
+     test.chain.removeAfter("PC_LOCAL_GET_ANSWER");
+diff --git a/dom/media/tests/mochitest/test_peerConnection_addSecondAudioStream.html b/dom/media/tests/mochitest/test_peerConnection_addSecondAudioStream.html
+--- a/dom/media/tests/mochitest/test_peerConnection_addSecondAudioStream.html
++++ b/dom/media/tests/mochitest/test_peerConnection_addSecondAudioStream.html
+@@ -13,6 +13,7 @@
+ 
+   var test;
+   runNetworkTest(function (options) {
++    SimpleTest.waitForExplicitFinish();
+     test = new PeerConnectionTest(options);
+     addRenegotiation(test.chain,
+       [
+diff --git a/dom/media/tests/mochitest/test_peerConnection_addSecondAudioStreamNoBundle.html b/dom/media/tests/mochitest/test_peerConnection_addSecondAudioStreamNoBundle.html
+--- a/dom/media/tests/mochitest/test_peerConnection_addSecondAudioStreamNoBundle.html
++++ b/dom/media/tests/mochitest/test_peerConnection_addSecondAudioStreamNoBundle.html
+@@ -13,6 +13,7 @@
+ 
+   var test;
+   runNetworkTest(function (options) {
++    SimpleTest.waitForExplicitFinish();
+     options = options || { };
+     options.bundle = false;
+     test = new PeerConnectionTest(options);
+diff --git a/dom/media/tests/mochitest/test_peerConnection_addSecondVideoStream.html b/dom/media/tests/mochitest/test_peerConnection_addSecondVideoStream.html
+--- a/dom/media/tests/mochitest/test_peerConnection_addSecondVideoStream.html
++++ b/dom/media/tests/mochitest/test_peerConnection_addSecondVideoStream.html
+@@ -13,6 +13,7 @@
+ 
+   var test;
+   runNetworkTest(function (options) {
++    SimpleTest.waitForExplicitFinish();
+     test = new PeerConnectionTest(options);
+     addRenegotiation(test.chain,
+       [
+diff --git a/dom/media/tests/mochitest/test_peerConnection_addSecondVideoStreamNoBundle.html b/dom/media/tests/mochitest/test_peerConnection_addSecondVideoStreamNoBundle.html
+--- a/dom/media/tests/mochitest/test_peerConnection_addSecondVideoStreamNoBundle.html
++++ b/dom/media/tests/mochitest/test_peerConnection_addSecondVideoStreamNoBundle.html
+@@ -13,6 +13,7 @@
+ 
+   var test;
+   runNetworkTest(function (options) {
++    SimpleTest.waitForExplicitFinish();
+     options = options || { };
+     options.bundle = false;
+     test = new PeerConnectionTest(options);
+diff --git a/dom/media/tests/mochitest/test_peerConnection_addtrack_removetrack_events.html b/dom/media/tests/mochitest/test_peerConnection_addtrack_removetrack_events.html
+--- a/dom/media/tests/mochitest/test_peerConnection_addtrack_removetrack_events.html
++++ b/dom/media/tests/mochitest/test_peerConnection_addtrack_removetrack_events.html
+@@ -14,6 +14,7 @@ createHTML({
+ });
+ 
+ runNetworkTest(function (options) {
++  SimpleTest.waitForExplicitFinish();
+   let test = new PeerConnectionTest(options);
+   let eventsPromise;
+   addRenegotiation(test.chain,
+diff --git a/dom/media/tests/mochitest/test_peerConnection_answererAddSecondAudioStream.html b/dom/media/tests/mochitest/test_peerConnection_answererAddSecondAudioStream.html
+--- a/dom/media/tests/mochitest/test_peerConnection_answererAddSecondAudioStream.html
++++ b/dom/media/tests/mochitest/test_peerConnection_answererAddSecondAudioStream.html
+@@ -13,6 +13,7 @@
+ 
+   var test;
+   runNetworkTest(function (options) {
++    SimpleTest.waitForExplicitFinish();
+     test = new PeerConnectionTest(options);
+     addRenegotiationAnswerer(test.chain,
+       [
+diff --git a/dom/media/tests/mochitest/test_peerConnection_audioRenegotiationInactiveAnswer.html b/dom/media/tests/mochitest/test_peerConnection_audioRenegotiationInactiveAnswer.html
+--- a/dom/media/tests/mochitest/test_peerConnection_audioRenegotiationInactiveAnswer.html
++++ b/dom/media/tests/mochitest/test_peerConnection_audioRenegotiationInactiveAnswer.html
+@@ -14,6 +14,7 @@
+ 
+   var test;
+   runNetworkTest(function (options) {
++    SimpleTest.waitForExplicitFinish();
+     var helper = new AudioStreamHelper();
+ 
+     test = new PeerConnectionTest(options);
+diff --git a/dom/media/tests/mochitest/test_peerConnection_basicAudio.html b/dom/media/tests/mochitest/test_peerConnection_basicAudio.html
+--- a/dom/media/tests/mochitest/test_peerConnection_basicAudio.html
++++ b/dom/media/tests/mochitest/test_peerConnection_basicAudio.html
+@@ -13,6 +13,7 @@
+ 
+   var test;
+   runNetworkTest(function (options) {
++    SimpleTest.waitForExplicitFinish();
+     test = new PeerConnectionTest(options);
+     test.setMediaConstraints([{audio: true}], [{audio: true}]);
+     // pc.js uses video elements by default, we want to test audio elements here
+diff --git a/dom/media/tests/mochitest/test_peerConnection_basicAudioDynamicPtMissingRtpmap.html b/dom/media/tests/mochitest/test_peerConnection_basicAudioDynamicPtMissingRtpmap.html
+--- a/dom/media/tests/mochitest/test_peerConnection_basicAudioDynamicPtMissingRtpmap.html
++++ b/dom/media/tests/mochitest/test_peerConnection_basicAudioDynamicPtMissingRtpmap.html
+@@ -13,6 +13,7 @@
+ 
+   var test;
+   runNetworkTest(function (options) {
++    SimpleTest.waitForExplicitFinish();
+     options = options || { };
+     // we want Opus to get selected and 101 to be ignored
+     options.opus = true;
+diff --git a/dom/media/tests/mochitest/test_peerConnection_basicAudioNATRelay.html b/dom/media/tests/mochitest/test_peerConnection_basicAudioNATRelay.html
+--- a/dom/media/tests/mochitest/test_peerConnection_basicAudioNATRelay.html
++++ b/dom/media/tests/mochitest/test_peerConnection_basicAudioNATRelay.html
+@@ -14,6 +14,7 @@
+ 
+   var test;
+   runNetworkTest(options => {
++    SimpleTest.waitForExplicitFinish();
+     SpecialPowers.pushPrefEnv(
+       {
+         'set': [
+diff --git a/dom/media/tests/mochitest/test_peerConnection_basicAudioNATRelayTCP.html b/dom/media/tests/mochitest/test_peerConnection_basicAudioNATRelayTCP.html
+--- a/dom/media/tests/mochitest/test_peerConnection_basicAudioNATRelayTCP.html
++++ b/dom/media/tests/mochitest/test_peerConnection_basicAudioNATRelayTCP.html
+@@ -13,6 +13,7 @@
+ 
+   var test;
+   runNetworkTest(options => {
++    SimpleTest.waitForExplicitFinish();
+     SpecialPowers.pushPrefEnv(
+       {
+         'set': [
+diff --git a/dom/media/tests/mochitest/test_peerConnection_basicAudioNATSrflx.html b/dom/media/tests/mochitest/test_peerConnection_basicAudioNATSrflx.html
+--- a/dom/media/tests/mochitest/test_peerConnection_basicAudioNATSrflx.html
++++ b/dom/media/tests/mochitest/test_peerConnection_basicAudioNATSrflx.html
+@@ -14,6 +14,7 @@
+ 
+   var test;
+   runNetworkTest(options => {
++    SimpleTest.waitForExplicitFinish();
+     SpecialPowers.pushPrefEnv(
+       {
+         'set': [
+diff --git a/dom/media/tests/mochitest/test_peerConnection_basicAudioPcmaPcmuOnly.html b/dom/media/tests/mochitest/test_peerConnection_basicAudioPcmaPcmuOnly.html
+--- a/dom/media/tests/mochitest/test_peerConnection_basicAudioPcmaPcmuOnly.html
++++ b/dom/media/tests/mochitest/test_peerConnection_basicAudioPcmaPcmuOnly.html
+@@ -13,6 +13,7 @@
+ 
+   var test;
+   runNetworkTest(function (options) {
++    SimpleTest.waitForExplicitFinish();
+     options = options || { };
+     options.opus = false;
+     test = new PeerConnectionTest(options);
+diff --git a/dom/media/tests/mochitest/test_peerConnection_basicAudioRequireEOC.html b/dom/media/tests/mochitest/test_peerConnection_basicAudioRequireEOC.html
+--- a/dom/media/tests/mochitest/test_peerConnection_basicAudioRequireEOC.html
++++ b/dom/media/tests/mochitest/test_peerConnection_basicAudioRequireEOC.html
+@@ -13,6 +13,7 @@
+ 
+   var test;
+   runNetworkTest(function (options) {
++    SimpleTest.waitForExplicitFinish();
+     test = new PeerConnectionTest(options);
+     test.chain.replace("PC_LOCAL_VERIFY_SDP_AFTER_END_OF_TRICKLE", [
+       function PC_LOCAL_REQUIRE_SDP_AFTER_END_OF_TRICKLE(test) {
+diff --git a/dom/media/tests/mochitest/test_peerConnection_basicAudioVideo.html b/dom/media/tests/mochitest/test_peerConnection_basicAudioVideo.html
+--- a/dom/media/tests/mochitest/test_peerConnection_basicAudioVideo.html
++++ b/dom/media/tests/mochitest/test_peerConnection_basicAudioVideo.html
+@@ -13,6 +13,7 @@
+ 
+   var test;
+   runNetworkTest(function (options) {
++    SimpleTest.waitForExplicitFinish();
+     test = new PeerConnectionTest(options);
+     test.setMediaConstraints([{audio: true}, {video: true}],
+                              [{audio: true}, {video: true}]);
+diff --git a/dom/media/tests/mochitest/test_peerConnection_basicAudioVideoCombined.html b/dom/media/tests/mochitest/test_peerConnection_basicAudioVideoCombined.html
+--- a/dom/media/tests/mochitest/test_peerConnection_basicAudioVideoCombined.html
++++ b/dom/media/tests/mochitest/test_peerConnection_basicAudioVideoCombined.html
+@@ -13,6 +13,7 @@
+ 
+   var test;
+   runNetworkTest(function (options) {
++    SimpleTest.waitForExplicitFinish();
+     test = new PeerConnectionTest(options);
+     test.setMediaConstraints([{audio: true, video: true}],
+                              [{audio: true, video: true}]);
+diff --git a/dom/media/tests/mochitest/test_peerConnection_basicAudioVideoNoBundle.html b/dom/media/tests/mochitest/test_peerConnection_basicAudioVideoNoBundle.html
+--- a/dom/media/tests/mochitest/test_peerConnection_basicAudioVideoNoBundle.html
++++ b/dom/media/tests/mochitest/test_peerConnection_basicAudioVideoNoBundle.html
+@@ -12,6 +12,7 @@
+   });
+ 
+   runNetworkTest(options => {
++    SimpleTest.waitForExplicitFinish();
+     options = options || { };
+     options.bundle = false;
+     var test = new PeerConnectionTest(options);
+diff --git a/dom/media/tests/mochitest/test_peerConnection_basicAudioVideoNoBundleNoRtcpMux.html b/dom/media/tests/mochitest/test_peerConnection_basicAudioVideoNoBundleNoRtcpMux.html
+--- a/dom/media/tests/mochitest/test_peerConnection_basicAudioVideoNoBundleNoRtcpMux.html
++++ b/dom/media/tests/mochitest/test_peerConnection_basicAudioVideoNoBundleNoRtcpMux.html
+@@ -13,6 +13,7 @@
+ 
+   var test;
+   runNetworkTest(function (options) {
++    SimpleTest.waitForExplicitFinish();
+     options = options || { };
+     options.bundle = false;
+     options.rtcpmux = false;
+diff --git a/dom/media/tests/mochitest/test_peerConnection_basicAudioVideoNoRtcpMux.html b/dom/media/tests/mochitest/test_peerConnection_basicAudioVideoNoRtcpMux.html
+--- a/dom/media/tests/mochitest/test_peerConnection_basicAudioVideoNoRtcpMux.html
++++ b/dom/media/tests/mochitest/test_peerConnection_basicAudioVideoNoRtcpMux.html
+@@ -13,6 +13,7 @@
+ 
+   var test;
+   runNetworkTest(function (options) {
++    SimpleTest.waitForExplicitFinish();
+     options = options || { };
+     options.rtcpmux = false;
+     test = new PeerConnectionTest(options);
+diff --git a/dom/media/tests/mochitest/test_peerConnection_basicH264Video.html b/dom/media/tests/mochitest/test_peerConnection_basicH264Video.html
+--- a/dom/media/tests/mochitest/test_peerConnection_basicH264Video.html
++++ b/dom/media/tests/mochitest/test_peerConnection_basicH264Video.html
+@@ -13,6 +13,7 @@
+ 
+   var test;
+   runNetworkTest(function (options) {
++    SimpleTest.waitForExplicitFinish();
+     options = options || { };
+     options.h264 = true;
+     test = new PeerConnectionTest(options);
+diff --git a/dom/media/tests/mochitest/test_peerConnection_basicScreenshare.html b/dom/media/tests/mochitest/test_peerConnection_basicScreenshare.html
+--- a/dom/media/tests/mochitest/test_peerConnection_basicScreenshare.html
++++ b/dom/media/tests/mochitest/test_peerConnection_basicScreenshare.html
+@@ -13,6 +13,7 @@
+ 
+   var test;
+   runNetworkTest(function (options) {
++    SimpleTest.waitForExplicitFinish();
+     const isWinXP = navigator.userAgent.indexOf("Windows NT 5.1") != -1;
+     if (IsMacOSX10_6orOlder() || isWinXP) {
+         ok(true, "Screensharing disabled for OSX10.6 and WinXP");
+diff --git a/dom/media/tests/mochitest/test_peerConnection_basicVideo.html b/dom/media/tests/mochitest/test_peerConnection_basicVideo.html
+--- a/dom/media/tests/mochitest/test_peerConnection_basicVideo.html
++++ b/dom/media/tests/mochitest/test_peerConnection_basicVideo.html
+@@ -13,6 +13,7 @@
+ 
+   var test;
+   runNetworkTest(function (options) {
++    SimpleTest.waitForExplicitFinish();
+     test = new PeerConnectionTest(options);
+     test.setMediaConstraints([{video: true}], [{video: true}]);
+     test.run();
+diff --git a/dom/media/tests/mochitest/test_peerConnection_basicWindowshare.html b/dom/media/tests/mochitest/test_peerConnection_basicWindowshare.html
+--- a/dom/media/tests/mochitest/test_peerConnection_basicWindowshare.html
++++ b/dom/media/tests/mochitest/test_peerConnection_basicWindowshare.html
+@@ -13,6 +13,7 @@
+ 
+   var test;
+   runNetworkTest(function (options) {
++    SimpleTest.waitForExplicitFinish();
+     const isWinXP = navigator.userAgent.indexOf("Windows NT 5.1") != -1;
+     if (IsMacOSX10_6orOlder() || isWinXP) {
+         ok(true, "Screensharing disabled for OSX10.6 and WinXP");
+diff --git a/dom/media/tests/mochitest/test_peerConnection_bug1013809.html b/dom/media/tests/mochitest/test_peerConnection_bug1013809.html
+--- a/dom/media/tests/mochitest/test_peerConnection_bug1013809.html
++++ b/dom/media/tests/mochitest/test_peerConnection_bug1013809.html
+@@ -13,6 +13,7 @@
+ 
+   var test;
+   runNetworkTest(function (options) {
++    SimpleTest.waitForExplicitFinish();
+     test = new PeerConnectionTest(options);
+     var sld = test.chain.remove("PC_REMOTE_SET_LOCAL_DESCRIPTION");
+     test.chain.insertAfter("PC_LOCAL_SET_REMOTE_DESCRIPTION", sld);
+diff --git a/dom/media/tests/mochitest/test_peerConnection_bug1042791.html b/dom/media/tests/mochitest/test_peerConnection_bug1042791.html
+--- a/dom/media/tests/mochitest/test_peerConnection_bug1042791.html
++++ b/dom/media/tests/mochitest/test_peerConnection_bug1042791.html
+@@ -13,6 +13,7 @@
+ 
+   var test;
+   runNetworkTest(function (options) {
++    SimpleTest.waitForExplicitFinish();
+     options = options || { };
+     options.h264 = true;
+     test = new PeerConnectionTest(options);
+diff --git a/dom/media/tests/mochitest/test_peerConnection_bug1064223.html b/dom/media/tests/mochitest/test_peerConnection_bug1064223.html
+--- a/dom/media/tests/mochitest/test_peerConnection_bug1064223.html
++++ b/dom/media/tests/mochitest/test_peerConnection_bug1064223.html
+@@ -12,6 +12,7 @@
+   });
+ 
+   runNetworkTest(function () {
++    SimpleTest.waitForExplicitFinish();
+     var pc = new mozRTCPeerConnection();
+     var options = { mandatory: { OfferToReceiveVideo: true } }; // obsolete
+ 
+diff --git a/dom/media/tests/mochitest/test_peerConnection_bug1227781.html b/dom/media/tests/mochitest/test_peerConnection_bug1227781.html
+--- a/dom/media/tests/mochitest/test_peerConnection_bug1227781.html
++++ b/dom/media/tests/mochitest/test_peerConnection_bug1227781.html
+@@ -15,6 +15,7 @@
+                                    :"mozilla","url":"turn:test@10.0.0.1"}] };
+   var test;
+   runNetworkTest(function (options) {
++    SimpleTest.waitForExplicitFinish();
+     var exception = false;
+ 
+     try {
+diff --git a/dom/media/tests/mochitest/test_peerConnection_bug822674.html b/dom/media/tests/mochitest/test_peerConnection_bug822674.html
+--- a/dom/media/tests/mochitest/test_peerConnection_bug822674.html
++++ b/dom/media/tests/mochitest/test_peerConnection_bug822674.html
+@@ -12,6 +12,7 @@
+   });
+ 
+   runNetworkTest(function () {
++    SimpleTest.waitForExplicitFinish();
+     var pc = new RTCPeerConnection();
+ 
+     pc.thereIsNeverGoingToBeAPropertyWithThisNameOnThisInterface = 1;
+diff --git a/dom/media/tests/mochitest/test_peerConnection_bug825703.html b/dom/media/tests/mochitest/test_peerConnection_bug825703.html
+--- a/dom/media/tests/mochitest/test_peerConnection_bug825703.html
++++ b/dom/media/tests/mochitest/test_peerConnection_bug825703.html
+@@ -40,6 +40,7 @@ var toComparable = o =>
+ 
+ // This is a test of the iceServers parsing code + readable errors
+ runNetworkTest(() => {
++  SimpleTest.waitForExplicitFinish();
+   var exception = null;
+ 
+   try {
+diff --git a/dom/media/tests/mochitest/test_peerConnection_bug827843.html b/dom/media/tests/mochitest/test_peerConnection_bug827843.html
+--- a/dom/media/tests/mochitest/test_peerConnection_bug827843.html
++++ b/dom/media/tests/mochitest/test_peerConnection_bug827843.html
+@@ -59,6 +59,7 @@ var steps = [
+ 
+ var test;
+ runNetworkTest(() => {
++  SimpleTest.waitForExplicitFinish();
+   test = new PeerConnectionTest();
+   test.setMediaConstraints([{audio: true}], [{audio: true}]);
+   test.chain.append(steps);
+diff --git a/dom/media/tests/mochitest/test_peerConnection_bug834153.html b/dom/media/tests/mochitest/test_peerConnection_bug834153.html
+--- a/dom/media/tests/mochitest/test_peerConnection_bug834153.html
++++ b/dom/media/tests/mochitest/test_peerConnection_bug834153.html
+@@ -12,6 +12,7 @@
+   });
+ 
+   runNetworkTest(function () {
++    SimpleTest.waitForExplicitFinish();
+     var pc1 = new RTCPeerConnection();
+     var pc2 = new RTCPeerConnection();
+ 
+diff --git a/dom/media/tests/mochitest/test_peerConnection_callbacks.html b/dom/media/tests/mochitest/test_peerConnection_callbacks.html
+--- a/dom/media/tests/mochitest/test_peerConnection_callbacks.html
++++ b/dom/media/tests/mochitest/test_peerConnection_callbacks.html
+@@ -59,6 +59,7 @@ var delivered = new Promise(resolve => {
+ });
+ 
+ runNetworkTest(function() {
++  SimpleTest.waitForExplicitFinish();
+   v1 = createMediaElement('video', 'v1');
+   v2 = createMediaElement('video', 'v2');
+   var canPlayThrough = new Promise(resolve => v2.canplaythrough = resolve);
+diff --git a/dom/media/tests/mochitest/test_peerConnection_captureStream_canvas_2d.html b/dom/media/tests/mochitest/test_peerConnection_captureStream_canvas_2d.html
+--- a/dom/media/tests/mochitest/test_peerConnection_captureStream_canvas_2d.html
++++ b/dom/media/tests/mochitest/test_peerConnection_captureStream_canvas_2d.html
+@@ -14,6 +14,7 @@ createHTML({
+ });
+ 
+ runNetworkTest(() => {
++  SimpleTest.waitForExplicitFinish();
+   var test = new PeerConnectionTest();
+   var mediaElement;
+   var h = new CaptureStreamTestHelper2D();
+diff --git a/dom/media/tests/mochitest/test_peerConnection_captureStream_canvas_webgl.html b/dom/media/tests/mochitest/test_peerConnection_captureStream_canvas_webgl.html
+--- a/dom/media/tests/mochitest/test_peerConnection_captureStream_canvas_webgl.html
++++ b/dom/media/tests/mochitest/test_peerConnection_captureStream_canvas_webgl.html
+@@ -25,6 +25,7 @@ createHTML({
+ });
+ 
+ runNetworkTest(() => {
++  SimpleTest.waitForExplicitFinish();
+   var test = new PeerConnectionTest();
+   var vremote;
+   var h = new CaptureStreamTestHelperWebGL();
+diff --git a/dom/media/tests/mochitest/test_peerConnection_close.html b/dom/media/tests/mochitest/test_peerConnection_close.html
+--- a/dom/media/tests/mochitest/test_peerConnection_close.html
++++ b/dom/media/tests/mochitest/test_peerConnection_close.html
+@@ -13,6 +13,7 @@
+   });
+ 
+   runNetworkTest(function () {
++    SimpleTest.waitForExplicitFinish();
+     var pc = new RTCPeerConnection();
+     var sender = pc.addTrack(getSilentTrack(), new MediaStream());
+     var exception = null;
+diff --git a/dom/media/tests/mochitest/test_peerConnection_closeDuringIce.html b/dom/media/tests/mochitest/test_peerConnection_closeDuringIce.html
+--- a/dom/media/tests/mochitest/test_peerConnection_closeDuringIce.html
++++ b/dom/media/tests/mochitest/test_peerConnection_closeDuringIce.html
+@@ -62,6 +62,7 @@ function PC_REMOTE_WAIT_FOR_ICE_CHECKING
+ }
+ 
+ runNetworkTest(() => {
++  SimpleTest.waitForExplicitFinish();
+   var test = new PeerConnectionTest();
+   test.setMediaConstraints([{audio: true}], [{audio: true}]);
+   test.chain.replace("PC_LOCAL_SETUP_ICE_HANDLER", PC_LOCAL_SETUP_NULL_ICE_HANDLER);
+diff --git a/dom/media/tests/mochitest/test_peerConnection_constructedStream.html b/dom/media/tests/mochitest/test_peerConnection_constructedStream.html
+--- a/dom/media/tests/mochitest/test_peerConnection_constructedStream.html
++++ b/dom/media/tests/mochitest/test_peerConnection_constructedStream.html
+@@ -13,6 +13,7 @@ createHTML({
+ });
+ 
+ runNetworkTest(() => {
++  SimpleTest.waitForExplicitFinish();
+   var test = new PeerConnectionTest();
+   var constructedStream;
+   var dummyStream = new MediaStream();
+diff --git a/dom/media/tests/mochitest/test_peerConnection_errorCallbacks.html b/dom/media/tests/mochitest/test_peerConnection_errorCallbacks.html
+--- a/dom/media/tests/mochitest/test_peerConnection_errorCallbacks.html
++++ b/dom/media/tests/mochitest/test_peerConnection_errorCallbacks.html
+@@ -44,6 +44,7 @@
+   // level to evoke an error in createOffer.
+ 
+   runNetworkTest(function () {
++    SimpleTest.waitForExplicitFinish();
+     testCreateAnswerError()
+     .then(testSetLocalDescriptionError)
+     .then(testSetRemoteDescriptionError)
+diff --git a/dom/media/tests/mochitest/test_peerConnection_forwarding_basicAudioVideoCombined.html b/dom/media/tests/mochitest/test_peerConnection_forwarding_basicAudioVideoCombined.html
+--- a/dom/media/tests/mochitest/test_peerConnection_forwarding_basicAudioVideoCombined.html
++++ b/dom/media/tests/mochitest/test_peerConnection_forwarding_basicAudioVideoCombined.html
+@@ -12,6 +12,7 @@
+   });
+ 
+ runNetworkTest(function() {
++  SimpleTest.waitForExplicitFinish();
+   var gumTest = new PeerConnectionTest();
+ 
+   var forwardingOptions = { config_local: { label_suffix: "forwarded" },
+diff --git a/dom/media/tests/mochitest/test_peerConnection_insertDTMF.html b/dom/media/tests/mochitest/test_peerConnection_insertDTMF.html
+--- a/dom/media/tests/mochitest/test_peerConnection_insertDTMF.html
++++ b/dom/media/tests/mochitest/test_peerConnection_insertDTMF.html
+@@ -53,6 +53,7 @@ function insertdtmftest(pc) {
+ }
+ 
+ runNetworkTest(() => {
++  SimpleTest.waitForExplicitFinish();
+   test = new PeerConnectionTest();
+   test.setMediaConstraints([{audio: true}], [{audio: true}]);
+   test.chain.removeAfter("PC_REMOTE_WAIT_FOR_MEDIA_FLOW");
+diff --git a/dom/media/tests/mochitest/test_peerConnection_localReofferRollback.html b/dom/media/tests/mochitest/test_peerConnection_localReofferRollback.html
+--- a/dom/media/tests/mochitest/test_peerConnection_localReofferRollback.html
++++ b/dom/media/tests/mochitest/test_peerConnection_localReofferRollback.html
+@@ -13,6 +13,7 @@
+ 
+   var test;
+   runNetworkTest(function (options) {
++    SimpleTest.waitForExplicitFinish();
+     test = new PeerConnectionTest(options);
+     addRenegotiation(test.chain, [
+         function PC_LOCAL_ADD_SECOND_STREAM(test) {
+diff --git a/dom/media/tests/mochitest/test_peerConnection_localRollback.html b/dom/media/tests/mochitest/test_peerConnection_localRollback.html
+--- a/dom/media/tests/mochitest/test_peerConnection_localRollback.html
++++ b/dom/media/tests/mochitest/test_peerConnection_localRollback.html
+@@ -13,6 +13,7 @@
+ 
+   var test;
+   runNetworkTest(function (options) {
++    SimpleTest.waitForExplicitFinish();
+     test = new PeerConnectionTest(options);
+     test.setMediaConstraints([{audio: true}], [{audio: true}]);
+     test.chain.insertBefore('PC_LOCAL_CREATE_OFFER', [
+diff --git a/dom/media/tests/mochitest/test_peerConnection_multiple_captureStream_canvas_2d.html b/dom/media/tests/mochitest/test_peerConnection_multiple_captureStream_canvas_2d.html
+--- a/dom/media/tests/mochitest/test_peerConnection_multiple_captureStream_canvas_2d.html
++++ b/dom/media/tests/mochitest/test_peerConnection_multiple_captureStream_canvas_2d.html
+@@ -17,6 +17,7 @@ createHTML({
+  * Test to verify using multiple capture streams concurrently.
+  */
+ runNetworkTest(() => {
++  SimpleTest.waitForExplicitFinish();
+   var test = new PeerConnectionTest();
+   var h = new CaptureStreamTestHelper2D(50, 50);
+ 
+diff --git a/dom/media/tests/mochitest/test_peerConnection_noTrickleAnswer.html b/dom/media/tests/mochitest/test_peerConnection_noTrickleAnswer.html
+--- a/dom/media/tests/mochitest/test_peerConnection_noTrickleAnswer.html
++++ b/dom/media/tests/mochitest/test_peerConnection_noTrickleAnswer.html
+@@ -14,6 +14,7 @@
+ 
+   var test;
+   runNetworkTest(function (options) {
++    SimpleTest.waitForExplicitFinish();
+     test = new PeerConnectionTest(options);
+     makeAnswererNonTrickle(test.chain);
+     test.setMediaConstraints([{audio: true}], [{audio: true}]);
+diff --git a/dom/media/tests/mochitest/test_peerConnection_noTrickleOffer.html b/dom/media/tests/mochitest/test_peerConnection_noTrickleOffer.html
+--- a/dom/media/tests/mochitest/test_peerConnection_noTrickleOffer.html
++++ b/dom/media/tests/mochitest/test_peerConnection_noTrickleOffer.html
+@@ -14,6 +14,7 @@
+ 
+   var test;
+   runNetworkTest(function (options) {
++    SimpleTest.waitForExplicitFinish();
+     test = new PeerConnectionTest(options);
+     makeOffererNonTrickle(test.chain);
+     test.setMediaConstraints([{audio: true}], [{audio: true}]);
+diff --git a/dom/media/tests/mochitest/test_peerConnection_noTrickleOfferAnswer.html b/dom/media/tests/mochitest/test_peerConnection_noTrickleOfferAnswer.html
+--- a/dom/media/tests/mochitest/test_peerConnection_noTrickleOfferAnswer.html
++++ b/dom/media/tests/mochitest/test_peerConnection_noTrickleOfferAnswer.html
+@@ -14,6 +14,7 @@
+ 
+   var test;
+   runNetworkTest(function (options) {
++    SimpleTest.waitForExplicitFinish();
+     test = new PeerConnectionTest(options);
+     makeOffererNonTrickle(test.chain);
+     makeAnswererNonTrickle(test.chain);
+diff --git a/dom/media/tests/mochitest/test_peerConnection_offerRequiresReceiveAudio.html b/dom/media/tests/mochitest/test_peerConnection_offerRequiresReceiveAudio.html
+--- a/dom/media/tests/mochitest/test_peerConnection_offerRequiresReceiveAudio.html
++++ b/dom/media/tests/mochitest/test_peerConnection_offerRequiresReceiveAudio.html
+@@ -12,6 +12,7 @@
+   });
+ 
+   runNetworkTest(function() {
++    SimpleTest.waitForExplicitFinish();
+     var test = new PeerConnectionTest();
+     test.setMediaConstraints([], [{audio: true}]);
+     test.setOfferOptions({ offerToReceiveAudio: true });
+diff --git a/dom/media/tests/mochitest/test_peerConnection_offerRequiresReceiveVideo.html b/dom/media/tests/mochitest/test_peerConnection_offerRequiresReceiveVideo.html
+--- a/dom/media/tests/mochitest/test_peerConnection_offerRequiresReceiveVideo.html
++++ b/dom/media/tests/mochitest/test_peerConnection_offerRequiresReceiveVideo.html
+@@ -12,6 +12,7 @@
+   });
+ 
+   runNetworkTest(function() {
++    SimpleTest.waitForExplicitFinish();
+     var test = new PeerConnectionTest();
+     test.setMediaConstraints([], [{video: true}]);
+     test.setOfferOptions({ offerToReceiveVideo: true });
+diff --git a/dom/media/tests/mochitest/test_peerConnection_offerRequiresReceiveVideoAudio.html b/dom/media/tests/mochitest/test_peerConnection_offerRequiresReceiveVideoAudio.html
+--- a/dom/media/tests/mochitest/test_peerConnection_offerRequiresReceiveVideoAudio.html
++++ b/dom/media/tests/mochitest/test_peerConnection_offerRequiresReceiveVideoAudio.html
+@@ -12,6 +12,7 @@
+   });
+ 
+   runNetworkTest(function() {
++    SimpleTest.waitForExplicitFinish();
+     var test = new PeerConnectionTest();
+     test.setMediaConstraints([], [{audio: true, video: true}]);
+     test.setOfferOptions({ offerToReceiveVideo: true, offerToReceiveAudio: true });
+diff --git a/dom/media/tests/mochitest/test_peerConnection_promiseSendOnly.html b/dom/media/tests/mochitest/test_peerConnection_promiseSendOnly.html
+--- a/dom/media/tests/mochitest/test_peerConnection_promiseSendOnly.html
++++ b/dom/media/tests/mochitest/test_peerConnection_promiseSendOnly.html
+@@ -35,6 +35,7 @@
+   });
+ 
+   runNetworkTest(function() {
++    SimpleTest.waitForExplicitFinish();
+     v1 = createMediaElement('video', 'v1');
+     v2 = createMediaElement('video', 'v2');
+     var canPlayThrough = new Promise(resolve => v2.canplaythrough = e => resolve());
+diff --git a/dom/media/tests/mochitest/test_peerConnection_remoteReofferRollback.html b/dom/media/tests/mochitest/test_peerConnection_remoteReofferRollback.html
+--- a/dom/media/tests/mochitest/test_peerConnection_remoteReofferRollback.html
++++ b/dom/media/tests/mochitest/test_peerConnection_remoteReofferRollback.html
+@@ -13,6 +13,7 @@
+ 
+   var test;
+   runNetworkTest(function (options) {
++    SimpleTest.waitForExplicitFinish();
+     test = new PeerConnectionTest(options);
+     addRenegotiation(test.chain,
+       [
+diff --git a/dom/tests/mochitest/bugs/test_DOMWindowCreated_chromeonly.html b/dom/tests/mochitest/bugs/test_DOMWindowCreated_chromeonly.html
+--- a/dom/tests/mochitest/bugs/test_DOMWindowCreated_chromeonly.html
++++ b/dom/tests/mochitest/bugs/test_DOMWindowCreated_chromeonly.html
+@@ -3,11 +3,11 @@
+   <title>DOMWindowCreated not visible in content</title>
+   <script type="application/javascript" src="/tests/SimpleTest/SimpleTest.js"></script>
+   <link rel="stylesheet" type="text/css" href="/tests/SimpleTest/test.css"/>
+-<body onload="ok(true, 'Test finished'); SimpleTest.finish();">
++<body onload="ok(true, 'Test finished'); SimpleTest.waitForExplicitFinish(); SimpleTest.finish();">
+   <p id="display"></p>
+ 
+   <script type="application/javascript">
+-  SimpleTest.waitForExplicitFinish();
++  
+   window.addEventListener("DOMWindowCreated", function() { ok(false, "DOMWindowCreated should not have fired"); }, false);
+   window.addEventListener("DOMDocElementInserted", function() { ok(false, "DOMDocElementInserted should not have fired"); }, false);
+ 
+diff --git a/dom/tests/mochitest/chrome/test_bug830396.xul b/dom/tests/mochitest/chrome/test_bug830396.xul
+--- a/dom/tests/mochitest/chrome/test_bug830396.xul
++++ b/dom/tests/mochitest/chrome/test_bug830396.xul
+@@ -12,7 +12,7 @@ https://bugzilla.mozilla.org/show_bug.cg
+           src="chrome://mochikit/content/tests/SimpleTest/SimpleTest.js" />
+ <script class="testbody" type="application/javascript">
+ <![CDATA[
+-
++SimpleTest.waitForExplicitFinish();
+ function runTests()
+ {
+   var doc = frames[0].document;
+diff --git a/dom/tests/mochitest/sessionstorage/test_sessionStorageFromChrome.xhtml b/dom/tests/mochitest/sessionstorage/test_sessionStorageFromChrome.xhtml
+--- a/dom/tests/mochitest/sessionstorage/test_sessionStorageFromChrome.xhtml
++++ b/dom/tests/mochitest/sessionstorage/test_sessionStorageFromChrome.xhtml
+@@ -6,7 +6,7 @@
+ <link rel="stylesheet" type="text/css" href="chrome://mochikit/content/tests/SimpleTest/test.css" />
+ 
+ <script type="text/javascript">
+-
++SimpleTest.waitForExplicitFinish();
+ function startTest()
+ {
+   // Check that we do not crash when we access the sessionStorage object from
+diff --git a/layout/base/tests/chrome/test_bug708062.html b/layout/base/tests/chrome/test_bug708062.html
+--- a/layout/base/tests/chrome/test_bug708062.html
++++ b/layout/base/tests/chrome/test_bug708062.html
+@@ -20,6 +20,7 @@ https://bugzilla.mozilla.org/show_bug.cg
+ <pre id="test">
+ 
+ <script>
++SimpleTest.waitForExplicitFinish();
+ function isBoundingClientRect(e, r, msg) {
+   var BCR = e.getBoundingClientRect();
+   is([BCR.left, BCR.top, BCR.right, BCR.bottom].join(','), r, msg);
+diff --git a/layout/mathml/tests/test_opentype-fraction.html b/layout/mathml/tests/test_opentype-fraction.html
+--- a/layout/mathml/tests/test_opentype-fraction.html
++++ b/layout/mathml/tests/test_opentype-fraction.html
+@@ -97,7 +97,7 @@
+ 
+         ok(almostEqual(getBox("d9").bottom - getBox("dref").bottom, ref*3),
+            "Bad FractionDenominatorDisplayStyleShiftDown");
+-
++        SimpleTest.waitForExplicitFinish();
+         SimpleTest.finish();
+       }
+     </script>
+diff --git a/netwerk/test/mochitests/test_viewsource_unlinkable.html b/netwerk/test/mochitests/test_viewsource_unlinkable.html
+--- a/netwerk/test/mochitests/test_viewsource_unlinkable.html
++++ b/netwerk/test/mochitests/test_viewsource_unlinkable.html
+@@ -12,6 +12,7 @@ function runTest() {
+   SimpleTest.doesThrow(function() {
+     window.open('view-source:' + location.href, "_blank");
+   }, "Trying to access view-source URL from unprivileged code should throw.");
++  SimpleTest.waitForExplicitFinish();
+   SimpleTest.finish();
+ }
+ </script>
+diff --git a/security/manager/ssl/tests/mochitest/mixedcontent/test_bug329869.html b/security/manager/ssl/tests/mochitest/mixedcontent/test_bug329869.html
+--- a/security/manager/ssl/tests/mochitest/mixedcontent/test_bug329869.html
++++ b/security/manager/ssl/tests/mochitest/mixedcontent/test_bug329869.html
+@@ -9,7 +9,7 @@
+   <script class="testbody" type="text/javascript">
+   /* import-globals-from mixedContentTest.js */
+   "use strict";
+-
++  SimpleTest.waitForExplicitFinish();
+   hasMixedActiveContent = true;
+ 
+   function runTest()
+diff --git a/security/manager/ssl/tests/mochitest/mixedcontent/test_bug383369.html b/security/manager/ssl/tests/mochitest/mixedcontent/test_bug383369.html
+--- a/security/manager/ssl/tests/mochitest/mixedcontent/test_bug383369.html
++++ b/security/manager/ssl/tests/mochitest/mixedcontent/test_bug383369.html
+@@ -11,7 +11,7 @@
+   /* global sendAsyncMessage */
+   /* import-globals-from mixedContentTest.js */
+   "use strict";
+-
++  SimpleTest.waitForExplicitFinish();
+   // We want to start this test from an insecure context
+   loadAsInsecure = true;
+   // We don't want to go through the navigation back/forward test
+diff --git a/security/manager/ssl/tests/mochitest/mixedcontent/test_bug455367.html b/security/manager/ssl/tests/mochitest/mixedcontent/test_bug455367.html
+--- a/security/manager/ssl/tests/mochitest/mixedcontent/test_bug455367.html
++++ b/security/manager/ssl/tests/mochitest/mixedcontent/test_bug455367.html
+@@ -13,7 +13,7 @@
+   <script class="testbody" type="text/javascript">
+   /* import-globals-from mixedContentTest.js */
+   "use strict";
+-
++  SimpleTest.waitForExplicitFinish();
+   function runTest()
+   {
+     isSecurityState("broken", "broken");
+diff --git a/security/manager/ssl/tests/mochitest/mixedcontent/test_bug472986.html b/security/manager/ssl/tests/mochitest/mixedcontent/test_bug472986.html
+--- a/security/manager/ssl/tests/mochitest/mixedcontent/test_bug472986.html
++++ b/security/manager/ssl/tests/mochitest/mixedcontent/test_bug472986.html
+@@ -13,7 +13,7 @@
+   <script class="testbody" type="text/javascript">
+   /* import-globals-from mixedContentTest.js */
+   "use strict";
+-
++  SimpleTest.waitForExplicitFinish();
+   SimpleTest.expectAssertions(0, 4);
+ 
+   // Clear the default onload assigned to test start because we must
+diff --git a/security/manager/ssl/tests/mochitest/mixedcontent/test_bug477118.html b/security/manager/ssl/tests/mochitest/mixedcontent/test_bug477118.html
+--- a/security/manager/ssl/tests/mochitest/mixedcontent/test_bug477118.html
++++ b/security/manager/ssl/tests/mochitest/mixedcontent/test_bug477118.html
+@@ -13,7 +13,7 @@
+   <script class="testbody" type="text/javascript">
+   /* import-globals-from mixedContentTest.js */
+   "use strict";
+-
++  SimpleTest.waitForExplicitFinish();
+   function runTest()
+   {
+     isSecurityState("secure", "data <img> doesn't break security");
+diff --git a/security/manager/ssl/tests/mochitest/mixedcontent/test_bug521461.html b/security/manager/ssl/tests/mochitest/mixedcontent/test_bug521461.html
+--- a/security/manager/ssl/tests/mochitest/mixedcontent/test_bug521461.html
++++ b/security/manager/ssl/tests/mochitest/mixedcontent/test_bug521461.html
+@@ -13,7 +13,7 @@
+   <script class="testbody" type="text/javascript">
+   /* import-globals-from mixedContentTest.js */
+   "use strict";
+-
++  SimpleTest.waitForExplicitFinish();
+   loadAsInsecure = true;
+ 
+   function runTest()
+diff --git a/security/manager/ssl/tests/mochitest/mixedcontent/test_cssBefore1.html b/security/manager/ssl/tests/mochitest/mixedcontent/test_cssBefore1.html
+--- a/security/manager/ssl/tests/mochitest/mixedcontent/test_cssBefore1.html
++++ b/security/manager/ssl/tests/mochitest/mixedcontent/test_cssBefore1.html
+@@ -19,7 +19,7 @@
+   <script class="testbody" type="text/javascript">
+   /* import-globals-from mixedContentTest.js */
+   "use strict";
+-
++  SimpleTest.waitForExplicitFinish();
+   function runTest()
+   {
+     isSecurityState("broken", "insecure content added by :before styling breaks security");
+diff --git a/security/manager/ssl/tests/mochitest/mixedcontent/test_cssContent1.html b/security/manager/ssl/tests/mochitest/mixedcontent/test_cssContent1.html
+--- a/security/manager/ssl/tests/mochitest/mixedcontent/test_cssContent1.html
++++ b/security/manager/ssl/tests/mochitest/mixedcontent/test_cssContent1.html
+@@ -20,7 +20,7 @@
+   <script class="testbody" type="text/javascript">
+   /* import-globals-from mixedContentTest.js */
+   "use strict";
+-
++  SimpleTest.waitForExplicitFinish();
+   function runTest()
+   {
+     isSecurityState("broken", "insecure content added by :before styling breaks security");
+diff --git a/security/manager/ssl/tests/mochitest/mixedcontent/test_cssContent2.html b/security/manager/ssl/tests/mochitest/mixedcontent/test_cssContent2.html
+--- a/security/manager/ssl/tests/mochitest/mixedcontent/test_cssContent2.html
++++ b/security/manager/ssl/tests/mochitest/mixedcontent/test_cssContent2.html
+@@ -13,7 +13,7 @@
+   <script class="testbody" type="text/javascript">
+   /* import-globals-from mixedContentTest.js */
+   "use strict";
+-
++  SimpleTest.waitForExplicitFinish();
+   if (navigator.platform.startsWith("Mac")) {
+     SimpleTest.expectAssertions(0, 1);
+   }
+diff --git a/security/manager/ssl/tests/mochitest/mixedcontent/test_documentWrite1.html b/security/manager/ssl/tests/mochitest/mixedcontent/test_documentWrite1.html
+--- a/security/manager/ssl/tests/mochitest/mixedcontent/test_documentWrite1.html
++++ b/security/manager/ssl/tests/mochitest/mixedcontent/test_documentWrite1.html
+@@ -13,7 +13,7 @@
+   <script class="testbody" type="text/javascript">
+   /* import-globals-from mixedContentTest.js */
+   "use strict";
+-
++  SimpleTest.waitForExplicitFinish();
+   function runTest()
+   {
+     isSecurityState("broken", "insecure <img> written dynamically breaks security");
+diff --git a/security/manager/ssl/tests/mochitest/mixedcontent/test_documentWrite2.html b/security/manager/ssl/tests/mochitest/mixedcontent/test_documentWrite2.html
+--- a/security/manager/ssl/tests/mochitest/mixedcontent/test_documentWrite2.html
++++ b/security/manager/ssl/tests/mochitest/mixedcontent/test_documentWrite2.html
+@@ -13,7 +13,7 @@
+   <script class="testbody" type="text/javascript">
+   /* import-globals-from mixedContentTest.js */
+   "use strict";
+-
++  SimpleTest.waitForExplicitFinish();
+   hasMixedActiveContent = true;
+ 
+   function runTest()
+diff --git a/security/manager/ssl/tests/mochitest/mixedcontent/test_dynDelayedUnsecurePicture.html b/security/manager/ssl/tests/mochitest/mixedcontent/test_dynDelayedUnsecurePicture.html
+--- a/security/manager/ssl/tests/mochitest/mixedcontent/test_dynDelayedUnsecurePicture.html
++++ b/security/manager/ssl/tests/mochitest/mixedcontent/test_dynDelayedUnsecurePicture.html
+@@ -13,7 +13,7 @@
+   <script class="testbody" type="text/javascript">
+   /* import-globals-from mixedContentTest.js */
+   "use strict";
+-
++  SimpleTest.waitForExplicitFinish();
+   function runTest()
+   {
+     isSecurityState("secure");
+diff --git a/security/manager/ssl/tests/mochitest/mixedcontent/test_dynDelayedUnsecureXHR.html b/security/manager/ssl/tests/mochitest/mixedcontent/test_dynDelayedUnsecureXHR.html
+--- a/security/manager/ssl/tests/mochitest/mixedcontent/test_dynDelayedUnsecureXHR.html
++++ b/security/manager/ssl/tests/mochitest/mixedcontent/test_dynDelayedUnsecureXHR.html
+@@ -13,7 +13,7 @@
+   <script class="testbody" type="text/javascript">
+   /* import-globals-from mixedContentTest.js */
+   "use strict";
+-
++  SimpleTest.waitForExplicitFinish();
+   hasMixedActiveContent = true;
+ 
+   function runTest()
+diff --git a/security/manager/ssl/tests/mochitest/mixedcontent/test_dynUnsecureBackground.html b/security/manager/ssl/tests/mochitest/mixedcontent/test_dynUnsecureBackground.html
+--- a/security/manager/ssl/tests/mochitest/mixedcontent/test_dynUnsecureBackground.html
++++ b/security/manager/ssl/tests/mochitest/mixedcontent/test_dynUnsecureBackground.html
+@@ -13,7 +13,7 @@
+   <script class="testbody" type="text/javascript">
+   /* import-globals-from mixedContentTest.js */
+   "use strict";
+-
++  SimpleTest.waitForExplicitFinish();
+   // This test, as is, equals to https://kuix.de/misc/test17/358438.php
+ 
+   function runTest()
+diff --git a/security/manager/ssl/tests/mochitest/mixedcontent/test_dynUnsecureIframeRedirect.html b/security/manager/ssl/tests/mochitest/mixedcontent/test_dynUnsecureIframeRedirect.html
+--- a/security/manager/ssl/tests/mochitest/mixedcontent/test_dynUnsecureIframeRedirect.html
++++ b/security/manager/ssl/tests/mochitest/mixedcontent/test_dynUnsecureIframeRedirect.html
+@@ -13,7 +13,7 @@
+   <script class="testbody" type="text/javascript">
+   /* import-globals-from mixedContentTest.js */
+   "use strict";
+-
++  SimpleTest.waitForExplicitFinish();
+   hasMixedActiveContent = true;
+ 
+   function runTest()
+diff --git a/security/manager/ssl/tests/mochitest/mixedcontent/test_dynUnsecurePicture.html b/security/manager/ssl/tests/mochitest/mixedcontent/test_dynUnsecurePicture.html
+--- a/security/manager/ssl/tests/mochitest/mixedcontent/test_dynUnsecurePicture.html
++++ b/security/manager/ssl/tests/mochitest/mixedcontent/test_dynUnsecurePicture.html
+@@ -13,7 +13,7 @@
+   <script class="testbody" type="text/javascript">
+   /* import-globals-from mixedContentTest.js */
+   "use strict";
+-
++  SimpleTest.waitForExplicitFinish();
+   // This test, as is, equals to https://kuix.de/misc/test17/358438.php
+ 
+   function runTest()
+diff --git a/security/manager/ssl/tests/mochitest/mixedcontent/test_dynUnsecurePicturePreload.html b/security/manager/ssl/tests/mochitest/mixedcontent/test_dynUnsecurePicturePreload.html
+--- a/security/manager/ssl/tests/mochitest/mixedcontent/test_dynUnsecurePicturePreload.html
++++ b/security/manager/ssl/tests/mochitest/mixedcontent/test_dynUnsecurePicturePreload.html
+@@ -13,10 +13,10 @@
+   <script class="testbody" type="text/javascript">
+   /* import-globals-from mixedContentTest.js */
+   "use strict";
+-
++  
+   (new Image()).src =
+     "http://example.com/tests/security/manager/ssl/tests/mochitest/mixedcontent/moonsurface.jpg";
+-
++  SimpleTest.waitForExplicitFinish();
+   function runTest()
+   {
+     isSecurityState("broken", "(new Image()).src='http://...' changed to broken");
+diff --git a/security/manager/ssl/tests/mochitest/mixedcontent/test_innerHtmlDelayedUnsecurePicture.html b/security/manager/ssl/tests/mochitest/mixedcontent/test_innerHtmlDelayedUnsecurePicture.html
+--- a/security/manager/ssl/tests/mochitest/mixedcontent/test_innerHtmlDelayedUnsecurePicture.html
++++ b/security/manager/ssl/tests/mochitest/mixedcontent/test_innerHtmlDelayedUnsecurePicture.html
+@@ -13,7 +13,7 @@
+   <script class="testbody" type="text/javascript">
+   /* import-globals-from mixedContentTest.js */
+   "use strict";
+-
++  SimpleTest.waitForExplicitFinish();
+   function runTest()
+   {
+     isSecurityState("secure");
+diff --git a/security/manager/ssl/tests/mochitest/mixedcontent/test_innerHtmlUnsecurePicture.html b/security/manager/ssl/tests/mochitest/mixedcontent/test_innerHtmlUnsecurePicture.html
+--- a/security/manager/ssl/tests/mochitest/mixedcontent/test_innerHtmlUnsecurePicture.html
++++ b/security/manager/ssl/tests/mochitest/mixedcontent/test_innerHtmlUnsecurePicture.html
+@@ -13,7 +13,7 @@
+   <script class="testbody" type="text/javascript">
+   /* import-globals-from mixedContentTest.js */
+   "use strict";
+-
++  SimpleTest.waitForExplicitFinish();
+   function runTest()
+   {
+     isSecurityState("secure");
+diff --git a/security/manager/ssl/tests/mochitest/mixedcontent/test_javascriptPicture.html b/security/manager/ssl/tests/mochitest/mixedcontent/test_javascriptPicture.html
+--- a/security/manager/ssl/tests/mochitest/mixedcontent/test_javascriptPicture.html
++++ b/security/manager/ssl/tests/mochitest/mixedcontent/test_javascriptPicture.html
+@@ -13,7 +13,7 @@
+   <script class="testbody" type="text/javascript">
+   /* import-globals-from mixedContentTest.js */
+   "use strict";
+-
++  SimpleTest.waitForExplicitFinish();
+   function runTest()
+   {
+     isSecurityState("secure", "javascript: <img> should not break security");
+diff --git a/security/manager/ssl/tests/mochitest/mixedcontent/test_secureAll.html b/security/manager/ssl/tests/mochitest/mixedcontent/test_secureAll.html
+--- a/security/manager/ssl/tests/mochitest/mixedcontent/test_secureAll.html
++++ b/security/manager/ssl/tests/mochitest/mixedcontent/test_secureAll.html
+@@ -16,7 +16,7 @@
+   <script class="testbody" type="text/javascript">
+   /* import-globals-from mixedContentTest.js */
+   "use strict";
+-
++  SimpleTest.waitForExplicitFinish();
+   // Navigation test goes over an insecure page, test state leak
+   navigateToInsecure = true;
+ 
+diff --git a/security/manager/ssl/tests/mochitest/mixedcontent/test_securePicture.html b/security/manager/ssl/tests/mochitest/mixedcontent/test_securePicture.html
+--- a/security/manager/ssl/tests/mochitest/mixedcontent/test_securePicture.html
++++ b/security/manager/ssl/tests/mochitest/mixedcontent/test_securePicture.html
+@@ -13,7 +13,7 @@
+   <script class="testbody" type="text/javascript">
+   /* import-globals-from mixedContentTest.js */
+   "use strict";
+-
++  SimpleTest.waitForExplicitFinish();
+   loadAsInsecure = true;
+ 
+   function runTest()
+diff --git a/security/manager/ssl/tests/mochitest/mixedcontent/test_unsecureBackground.html b/security/manager/ssl/tests/mochitest/mixedcontent/test_unsecureBackground.html
+--- a/security/manager/ssl/tests/mochitest/mixedcontent/test_unsecureBackground.html
++++ b/security/manager/ssl/tests/mochitest/mixedcontent/test_unsecureBackground.html
+@@ -13,7 +13,7 @@
+   <script class="testbody" type="text/javascript">
+   /* import-globals-from mixedContentTest.js */
+   "use strict";
+-
++  SimpleTest.waitForExplicitFinish();
+   // This test, as is, equals to https://kuix.de/misc/test17/358438.php
+ 
+   function runTest()
+diff --git a/security/manager/ssl/tests/mochitest/mixedcontent/test_unsecureCSS.html b/security/manager/ssl/tests/mochitest/mixedcontent/test_unsecureCSS.html
+--- a/security/manager/ssl/tests/mochitest/mixedcontent/test_unsecureCSS.html
++++ b/security/manager/ssl/tests/mochitest/mixedcontent/test_unsecureCSS.html
+@@ -16,7 +16,7 @@
+   <script class="testbody" type="text/javascript">
+   /* import-globals-from mixedContentTest.js */
+   "use strict";
+-
++  SimpleTest.waitForExplicitFinish();
+   hasMixedActiveContent = true;
+ 
+   function runTest()
+diff --git a/security/manager/ssl/tests/mochitest/mixedcontent/test_unsecureIframe.html b/security/manager/ssl/tests/mochitest/mixedcontent/test_unsecureIframe.html
+--- a/security/manager/ssl/tests/mochitest/mixedcontent/test_unsecureIframe.html
++++ b/security/manager/ssl/tests/mochitest/mixedcontent/test_unsecureIframe.html
+@@ -13,7 +13,7 @@
+   <script class="testbody" type="text/javascript">
+   /* import-globals-from mixedContentTest.js */
+   "use strict";
+-
++  SimpleTest.waitForExplicitFinish();
+   hasMixedActiveContent = true;
+ 
+   function runTest()
+diff --git a/security/manager/ssl/tests/mochitest/mixedcontent/test_unsecureIframe2.html b/security/manager/ssl/tests/mochitest/mixedcontent/test_unsecureIframe2.html
+--- a/security/manager/ssl/tests/mochitest/mixedcontent/test_unsecureIframe2.html
++++ b/security/manager/ssl/tests/mochitest/mixedcontent/test_unsecureIframe2.html
+@@ -13,7 +13,7 @@
+   <script class="testbody" type="text/javascript">
+   /* import-globals-from mixedContentTest.js */
+   "use strict";
+-
++  SimpleTest.waitForExplicitFinish();
+   hasMixedActiveContent = true;
+ 
+   function runTest()
+diff --git a/security/manager/ssl/tests/mochitest/mixedcontent/test_unsecureIframeRedirect.html b/security/manager/ssl/tests/mochitest/mixedcontent/test_unsecureIframeRedirect.html
+--- a/security/manager/ssl/tests/mochitest/mixedcontent/test_unsecureIframeRedirect.html
++++ b/security/manager/ssl/tests/mochitest/mixedcontent/test_unsecureIframeRedirect.html
+@@ -13,7 +13,7 @@
+   <script class="testbody" type="text/javascript">
+   /* import-globals-from mixedContentTest.js */
+   "use strict";
+-
++  SimpleTest.waitForExplicitFinish();
+   hasMixedActiveContent = true;
+ 
+   function runTest()
+diff --git a/security/manager/ssl/tests/mochitest/mixedcontent/test_unsecurePicture.html b/security/manager/ssl/tests/mochitest/mixedcontent/test_unsecurePicture.html
+--- a/security/manager/ssl/tests/mochitest/mixedcontent/test_unsecurePicture.html
++++ b/security/manager/ssl/tests/mochitest/mixedcontent/test_unsecurePicture.html
+@@ -13,7 +13,7 @@
+   <script class="testbody" type="text/javascript">
+   /* import-globals-from mixedContentTest.js */
+   "use strict";
+-
++  SimpleTest.waitForExplicitFinish();
+   function runTest()
+   {
+     isSecurityState("broken", "insecure <img> load breaks security");
+diff --git a/security/manager/ssl/tests/mochitest/mixedcontent/test_unsecurePictureDup.html b/security/manager/ssl/tests/mochitest/mixedcontent/test_unsecurePictureDup.html
+--- a/security/manager/ssl/tests/mochitest/mixedcontent/test_unsecurePictureDup.html
++++ b/security/manager/ssl/tests/mochitest/mixedcontent/test_unsecurePictureDup.html
+@@ -9,7 +9,7 @@
+   <script class="testbody" type="text/javascript">
+   /* import-globals-from mixedContentTest.js */
+   "use strict";
+-
++  SimpleTest.waitForExplicitFinish();
+   openTwoWindows = true;
+   testPage = "unsecurePictureDup.html";
+ 
+diff --git a/security/manager/ssl/tests/mochitest/mixedcontent/test_unsecurePictureInIframe.html b/security/manager/ssl/tests/mochitest/mixedcontent/test_unsecurePictureInIframe.html
+--- a/security/manager/ssl/tests/mochitest/mixedcontent/test_unsecurePictureInIframe.html
++++ b/security/manager/ssl/tests/mochitest/mixedcontent/test_unsecurePictureInIframe.html
+@@ -13,7 +13,7 @@
+   <script class="testbody" type="text/javascript">
+   /* import-globals-from mixedContentTest.js */
+   "use strict";
+-
++  SimpleTest.waitForExplicitFinish();
+   hasMixedActiveContent = true;
+ 
+   function runTest()
+diff --git a/security/manager/ssl/tests/mochitest/mixedcontent/test_unsecureRedirect.html b/security/manager/ssl/tests/mochitest/mixedcontent/test_unsecureRedirect.html
+--- a/security/manager/ssl/tests/mochitest/mixedcontent/test_unsecureRedirect.html
++++ b/security/manager/ssl/tests/mochitest/mixedcontent/test_unsecureRedirect.html
+@@ -13,7 +13,7 @@
+   <script class="testbody" type="text/javascript">
+   /* import-globals-from mixedContentTest.js */
+   "use strict";
+-
++  SimpleTest.waitForExplicitFinish();
+   hasMixedActiveContent = true;
+ 
+   function runTest()
 diff --git a/testing/mochitest/tests/Harness_sanity/mochitest.ini b/testing/mochitest/tests/Harness_sanity/mochitest.ini
 --- a/testing/mochitest/tests/Harness_sanity/mochitest.ini
 +++ b/testing/mochitest/tests/Harness_sanity/mochitest.ini
@@ -81,3 +2101,15 @@ diff --git a/testing/mochitest/tests/SimpleTest/SimpleTest.js b/testing/mochites
              SimpleTest.finish();
          }
      });
+diff --git a/toolkit/components/passwordmgr/test/mochitest/test_xhr_2.html b/toolkit/components/passwordmgr/test/mochitest/test_xhr_2.html
+--- a/toolkit/components/passwordmgr/test/mochitest/test_xhr_2.html
++++ b/toolkit/components/passwordmgr/test/mochitest/test_xhr_2.html
+@@ -22,7 +22,7 @@ https://bugzilla.mozilla.org/show_bug.cg
+  * 2. connect authenticate.sjs that this time expects differentuser2:pass2 password
+  *    we must use the creds that are provided to the xhr witch are different and expected
+  */
+-
++SimpleTest.waitForExplicitFinish();
+ function doxhr(URL, user, pass, code, next) {
+   var xhr = new XMLHttpRequest();
+   if (user && pass)
